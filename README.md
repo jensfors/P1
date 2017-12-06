@@ -1,7 +1,2 @@
 # P1
-Analyse af livestream data
-
-
-My name is Jens and i'm aaaaaaaawesome
-
-my name is mathias
+Supposed to write a lot of nice shit bout the program ;b
