@@ -1,127 +1,85 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
-#include <windows.h>
 
-#define MAX 1000
-#define STARTHOUR 3
-#define STARTMIN 4
-#define STARTSEC 20
+#define MAX 800
 
 typedef struct twitchchat {
-    char date[10];
+    char date[MAX];
     int hour;
     int min;
     int sec;
-    char username[50];
-    char text[450];
-    int chats;
+    char username[MAX];
+    char text[MAX];
 } twitchchat;
 
-void get_twitch_chat(twitchchat test[], int *numberoflines);
-void timer(int *hour, int *min, int *sec, clock_t start_t, clock_t end_t);
+void get_twitch_chat(FILE *ifp, twitchchat test[]);
+int count_line(FILE *ifp);
 
 int main(void){
-    twitchchat test[MAX], anothertest[MAX], endtime[MAX]; 
-    int numberoflines = 0, i, j, k = 0, breaker = 0;
+    //twitchchat test[]; 
+    twitchchat *pointertest;
+    int numberoflines = 0;
+    
+    FILE *ifp;
+    ifp = fopen("twitchchat.txt", "r");
 
-    get_twitch_chat(test, &numberoflines);
-    printf("\nChat messages: %d\n", numberoflines);
+    if (ifp != NULL){
+        numberoflines = count_line(ifp);
+        pointertest = (twitchchat *)malloc(numberoflines * sizeof(twitchchat));
 
-    for(i = 0; i < numberoflines; i++){
-        for(j = 0; j <= k; j++){
-            if((strcmp(test[i].username, anothertest[j].username) == 0)){
-                anothertest[j].chats += 1;
-                breaker = 1; 
-            }
+        if (pointertest == NULL){
+            printf("Allocation problems. Bye.\n");
+            exit(EXIT_FAILURE);
         }
-          
-        if(breaker != 1){
-            anothertest[k+1] = test[i];
-            anothertest[k+1].chats = 1;
-            k += 1;
-        }          
-        breaker = 0;
+
+        get_twitch_chat(ifp, pointertest);
+        printf("\n%d\n", numberoflines);
+        
+        fclose(ifp);
+        free(pointertest);
     }
-
-    endtime[0].hour = test[numberoflines-1].hour - test[0].hour;
-    endtime[0].min = test[numberoflines-1].min - test[0].min;
-    endtime[0].sec = test[numberoflines-1].sec - test[0].sec;
-
-    printf("Users: %d\n", k);
-
-    for(i = 0, breaker = 0; i < k && breaker == 0; i++){
-        if(strcmp(anothertest[i].username, "frosty_nipple_god") == 0){
-            printf("\nUser %s chats %d times in the time frame %d:%d:%d\n", 
-            anothertest[i].username, anothertest[i].chats, endtime[0].hour, endtime[0].min, endtime[0].sec);
-            breaker = 1;
-        }
+    else{
+        printf("Can't open the file%s\n", "twitchchat.txt");
     }
+    
 
     return 0;
 
 }
 
-void get_twitch_chat(twitchchat test[], int *numberoflines){
-    int i = 0, hour = 0, min = 0, sec = 0;
-    char line[500],
-    dummystr[500];
-    fpos_t pos;
-    const clock_t start_t = clock();
-    clock_t end_t;
+void get_twitch_chat(FILE *ifp, twitchchat test[]){
+    int i = 0;
+    char line[400];
 
-    FILE *ifp;
-    ifp = fopen("twitchchat.txt", "r");
+    /*FILE *ifp;
+    ifp = fopen("twitchchat.txt", "r"); */
+    while(fgets(line, sizeof(line), ifp) != NULL){ 
+        sscanf(line, " [%s %d:%d:%d UTC] %[^:]: %500[^\n]", 
+        test[i].date,
+        &test[i].hour,
+        &test[i].min,
+        &test[i].sec,
+        test[i].username,
+        test[i].text);
 
-    while(1){
-        end_t = clock();
-        timer(&hour, &min, &sec, start_t, end_t);
-        Sleep(250);
-        printf("\n%d:%d:%d\n", hour, min, sec);
-        fgetpos(ifp, &pos);
-        if(fgets(line, sizeof(line), ifp) != NULL){ 
-            sscanf(line, " [%s %d:%d:%d UTC] %[^:]: %500[^\n]", 
-            test[i].date,
-            &test[i].hour,
-            &test[i].min,
-            &test[i].sec,
-            test[i].username,
-            test[i].text);
-            sscanf(line, " %[^\n]", dummystr);
-            printf("HELLO: %d %d %d\n", test[i].hour, test[i].min, test[i].sec);
-
-            if(test[i].hour == hour && test[i].min == min && test[i].sec == sec){
-                printf("[%s %d:%d:%d UTC] %s: %s\n", test[i].date,
-                test[i].hour,
-                test[i].min,
-                test[i].sec,
-                test[i].username,
-                test[i].text);
-                i++;
-            }
-            else{
-                fseek(ifp, -(strlen(dummystr) + 2), SEEK_CUR); /* seek backward from the current pos */
-            }
-            printf("%d\n", strlen(dummystr));
-            printf("%ld\n", ftell(ifp));
-        }
+        printf("[%s %d:%d:%d UTC] %s: %s\n", test[i].date,
+        test[i].hour,
+        test[i].min,
+        test[i].sec,
+        test[i].username,
+        test[i].text);
+        i++;
     }
-    *numberoflines = i;
     fclose(ifp);
 }
 
-void timer(int *hour, int *min, int *sec, clock_t start_t, clock_t end_t){
-    static int i = 0;
-    clock_t total_t;
-
-    if(end_t/CLOCKS_PER_SEC == i) {
-        end_t = clock();
-        total_t = (double)((end_t - start_t) / CLOCKS_PER_SEC);
-        *sec = total_t + STARTSEC % 60;
-        *min = *sec / 60 + STARTMIN;
-        *hour = *min / 60 + STARTHOUR;
+int count_line(FILE *ifp){
+    int i = 0;
+    char line[400];
+    while(fgets(line, sizeof(line), ifp) != NULL){ 
         i++;
     }
-
+    rewind(ifp);
+    return i;
 }
