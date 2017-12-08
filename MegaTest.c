@@ -106,15 +106,9 @@ void timer(int *hour, int *min, int *sec, clock_t start_t, clock_t end_t){
     if(end_t/CLOCKS_PER_SEC == i) {
         end_t = clock();
         total_t = (double)((end_t - start_t) / CLOCKS_PER_SEC) + STARTSEC + STARTMIN*60 + STARTHOUR*60*60;
-        /*if(*min == 60){
-            *min += 1;
-        }*/
-        *hour = total_t / 3600;
-        *min = (total_t - (*hour * 3600)) / 60;
         *sec = total_t % 60;
-        /* something wrong here: */
-        /* *min = *sec / 60 ; */
-        /* *hour = *min / 60; */
+        *min = (total_t / 60) % 60 ;
+        *hour = total_t / 3600;
         i++;
     }
 
