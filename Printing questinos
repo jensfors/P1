@@ -21,12 +21,12 @@ typedef struct twitchchat{
 int count_line(FILE *ifp);
 int get_twitch_chat(FILE *ifp, twitchchat test[], clock_t start_t);
 void timer(int *hour, int *min, int *sec, clock_t start_t, clock_t end_t);
-void find_questions(twitchchat test[], int n, int question_list[]);
+int find_questions(twitchchat test[], int n, twitchchat questions[]);
 
 int main(void){
     /*twitchchat test[];*/
-    twitchchat *pointertest;
-    int numberoflines = 0, msg_nr = 0, question_list[MAX];
+    twitchchat *pointertest, questions[500];
+    int numberoflines = 0, msg_nr = 0, question_nr = 0;
     const clock_t start_t = clock();
 
     FILE *ifp;
@@ -36,19 +36,17 @@ int main(void){
         numberoflines = count_line(ifp);
         pointertest = (twitchchat *)malloc(numberoflines * sizeof(twitchchat));
 
-        if (pointertest == NULL){
+        if(pointertest == NULL){
             printf("Allocation problems. Bye.\n");
             exit(EXIT_FAILURE);
         }
         while(1){
-            Sleep(10);
+            //Sleep(50);
             msg_nr = get_twitch_chat(ifp, pointertest, start_t);
-            find_questions(pointertest, msg_nr, question_list);
+            question_nr = find_questions(pointertest, msg_nr, questions);        
         }
         fclose(ifp);
         printf("\n%d\n", numberoflines);
-
-        fclose(ifp);
         free(pointertest);
     }
     else{
@@ -76,7 +74,7 @@ int get_twitch_chat(FILE *ifp, twitchchat test[], clock_t start_t){
 
     end_t = clock();
     timer(&hour, &min, &sec, start_t, end_t);
-    /*printf("\n%d:%d:%d\n", hour, min, sec);*/
+    printf("\n%d:%d:%d\n", hour, min, sec);
     if(fgets(line, sizeof(line), ifp) != NULL){
         sscanf(line, " [%s %d:%d:%d UTC] %[^:]: %500[^\n]",
                test[i].date,
@@ -114,7 +112,7 @@ void timer(int *hour, int *min, int *sec, clock_t start_t, clock_t end_t){
 
     if(end_t / CLOCKS_PER_SEC == i){
         end_t = clock();
-        total_t = (double)((end_t - start_t) / CLOCKS_PER_SEC) + STARTSEC + STARTMIN * 60 + STARTHOUR * 60 * 60;
+        total_t = (double)(((end_t - start_t) / CLOCKS_PER_SEC) + STARTSEC + STARTMIN * 60 + STARTHOUR * 60 * 60);
         *sec = total_t % 60;
         *min = (total_t / 60) % 60;
         *hour = total_t / 3600;
@@ -122,22 +120,22 @@ void timer(int *hour, int *min, int *sec, clock_t start_t, clock_t end_t){
     }
 }
 
-void find_questions(twitchchat test[], int n, int question_list[]){
-    int res = 0, i, length = strlen(test[n].text);
+int find_questions(twitchchat test[], int n, twitchchat questions[]){
+    int i, length = strlen(test[n].text);
+    static int j = 0;
     char curr[MAX];
     static char prev[MAX];
-
-    strcpy(curr,test[n].text);
-
+    strcpy(curr, test[n].text);
     if(prev != NULL && strcmp(curr, prev) != 0){
         for(i = length; i > 0; i--){
             if(test[n].text[i] == '?'){
-                printf("%s\n", curr);
+                questions[j] = test[n];
+                printf("%s\n", questions[j].text);
+                j++;
             }
         }
     }
-
-
     strcpy(prev,test[n].text);
 
+    return j;
 }
