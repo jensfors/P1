@@ -5,9 +5,9 @@
 #include <windows.h>
 
 #define MAX 1000
-#define STARTHOUR 0
-#define STARTMIN 0
-#define STARTSEC 0
+#define STARTHOUR 3
+#define STARTMIN 4
+#define STARTSEC 20
 
 typedef struct twitchchat {
     char date[MAX];
@@ -28,9 +28,9 @@ int main(void){
     int numberoflines = 0;
     
     FILE *ifp;
-    ifp = fopen("twitchchat2.txt", "r");
+    ifp = fopen("twitchchat.txt", "r");
 
-    if (ifp != NULL){
+    if(ifp != NULL){
         numberoflines = count_line(ifp);
         pointertest = (twitchchat *)malloc(numberoflines * sizeof(twitchchat));
 
@@ -67,7 +67,7 @@ void get_twitch_chat(FILE *ifp, twitchchat test[]){
         end_t = clock();
         timer(&hour, &min, &sec, start_t, end_t);
         Sleep(50);
-        printf("\n%d:%d:%d\n", hour+STARTHOUR, min+STARTMIN, sec+STARTSEC);
+        printf("\n%d:%d:%d\n", hour, min, sec);
         fgetpos(ifp, &pos);
         if(fgets(line, sizeof(line), ifp) != NULL){ 
             sscanf(line, " [%s %d:%d:%d UTC] %[^:]: %500[^\n]", 
@@ -107,7 +107,7 @@ void timer(int *hour, int *min, int *sec, clock_t start_t, clock_t end_t){
         end_t = clock();
         total_t = (double)((end_t - start_t) / CLOCKS_PER_SEC) + STARTSEC + STARTMIN*60 + STARTHOUR*60*60;
         *sec = total_t % 60;
-        *min = (total_t / 60) % 60 ;
+        *min = (total_t / 60) % 60;
         *hour = total_t / 3600;
         i++;
     }
