@@ -74,7 +74,7 @@ int get_twitch_chat(FILE *ifp, twitchchat test[], clock_t start_t){
 
     end_t = clock();
     timer(&hour, &min, &sec, start_t, end_t);
-    printf("\n%d:%d:%d\n", hour, min, sec);
+    /*printf("\n%d:%d:%d\n", hour, min, sec);*/
     if(fgets(line, sizeof(line), ifp) != NULL){
         sscanf(line, " [%s %d:%d:%d UTC] %[^:]: %500[^\n]",
                test[i].date,
