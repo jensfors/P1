@@ -80,7 +80,7 @@ void get_twitch_chat(FILE *ifp, twitchchat test[]){
             sscanf(line, " %[^\n]", dummystr);
             printf("HELLO: %d %d %d\n", test[i].hour, test[i].min, test[i].sec);
 
-            if(test[i].hour == (hour+STARTHOUR) && test[i].min == (min+STARTMIN) && test[i].sec == (sec+STARTSEC)){
+            if(test[i].hour == hour && test[i].min == min && test[i].sec == sec){
                 printf("[%s %d:%d:%d UTC] %s: %s\n", test[i].date,
                 test[i].hour,
                 test[i].min,
@@ -105,7 +105,7 @@ void timer(int *hour, int *min, int *sec, clock_t start_t, clock_t end_t){
 
     if(end_t/CLOCKS_PER_SEC == i) {
         end_t = clock();
-        total_t = (double)((end_t - start_t) / CLOCKS_PER_SEC);
+        total_t = (double)((end_t - start_t) / CLOCKS_PER_SEC) + STARTSEC + STARTMIN*60 + STARTHOUR*60*60;
         /*if(*min == 60){
             *min += 1;
         }*/
