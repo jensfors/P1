@@ -71,6 +71,7 @@ int main(void){
 }
 
 int get_twitch_chat(FILE *chatfile, FILE *emotefile, twitchchat chat[], emotelist emotes[], clock_t start_t, int amountofemotes){
+    /* emotenumber = what emote to use for highlight in emotes.txt, 0 = Kappa, 3 = LUL */
     static int i = 0, hour = 0, min = 0, sec = 0, emotenumber = 0;
     char line[500],
         dummystr[500];
@@ -166,6 +167,8 @@ void emote_counter(twitchchat chat[], emotelist emotes[], int i, int amountofemo
 /* Mathias has copyright on this function Jebaited */
 void emote_highlight(twitchchat chat[], emotelist emotes[], int i, int emotenumber){
     twitchchat emotetester[5];
+    /* secback = sec you go back to check for emotes */
+    /* triggernumber = how many emotes in secback to make highlight */
     int j = 0, k, n = 0, jebaiter = 0, secback = 30, startsec, totalsec, triggernumber = 40;
     
     totalsec = (chat[i].hour * 3600) + (chat[i].min * 60) + (chat[i].sec);
