@@ -30,43 +30,63 @@ void make_emote_struct(FILE *emotefile, twitchchat chat[], emotelist emotes[], i
 void emote_counter(twitchchat chat[], emotelist emotes[], int i, int amountofemotes);
 void emote_highlight(twitchchat chat[], emotelist emotes[], int i, int emotenumber);
 
+void highlight_options(){
+    printf("meme");
+} 
+
 int main(void){
-    /*twitchchat chat[];*/
+    /* twitchchat chat[]; */
     twitchchat *chat_line;
     emotelist *emotes;
-    int numberoflines = 0, msg_nr, amountofemotes = 0;
+    int numberoflines = 0, msg_nr, amountofemotes = 0, choice;
     const clock_t start_t = clock();
+    char highlightemotes[10];
+    highlightemotes[0] = 2;
+    highlightemotes[1] = 0;
+    
 
     FILE *chatfile;
     chatfile = fopen("twitchchat2.txt", "r");
     
     FILE *emotefile;
     emotefile = fopen("emotes.txt", "r");
-    
-    if(chatfile != NULL){
-        numberoflines = count_line(chatfile);
-        chat_line = (twitchchat *)malloc(numberoflines * sizeof(twitchchat));
-        emotes = (emotelist *)malloc(20 * sizeof(emotelist));
 
-        make_emote_struct(emotefile, chat_line, emotes, &amountofemotes);
+    /*
+    do{
+        printf("Enter number: ");
+        scanf("%d", &choice);
 
-        if (chat_line == NULL){
-            printf("Allocation problems. Bye.\n");
-            exit(EXIT_FAILURE);
+        switch(choice){
+            case 1: highlight_options();
+            case 2: */
+            if(chatfile != NULL){
+                numberoflines = count_line(chatfile);
+                chat_line = (twitchchat *)malloc(numberoflines * sizeof(twitchchat));
+                emotes = (emotelist *)malloc(20 * sizeof(emotelist));
+        
+                make_emote_struct(emotefile, chat_line, emotes, &amountofemotes);
+        
+                if (chat_line == NULL){
+                    printf("Allocation problems. Bye.\n");
+                    exit(EXIT_FAILURE);
+                }
+                while(1){
+                    msg_nr = get_twitch_chat(chatfile, emotefile, chat_line, emotes, start_t, amountofemotes);
+                }
+                fclose(chatfile);
+                fclose(emotefile);
+                printf("\n%d\n", numberoflines);
+        
+                free(chat_line);
+            }
+            else{
+                printf("Can't open the file%s\n", "twitchchat.txt");
+            }
+            /*
         }
-        while(1){
-            msg_nr = get_twitch_chat(chatfile, emotefile, chat_line, emotes, start_t, amountofemotes);
-        }
-        fclose(chatfile);
-        fclose(emotefile);
-        printf("\n%d\n", numberoflines);
-
-        free(chat_line);
     }
-    else{
-        printf("Can't open the file%s\n", "twitchchat.txt");
-    }
-
+    while(choice != 0);
+*/
     return 0;
 }
 
@@ -78,7 +98,6 @@ int get_twitch_chat(FILE *chatfile, FILE *emotefile, twitchchat chat[], emotelis
     static clock_t end_t;
     end_t = clock();
     timer(&hour, &min, &sec, start_t, end_t);
-
 
     Sleep(20);
     /*printf("%d:%d:%d  ", hour, min, sec); */
@@ -169,7 +188,7 @@ void emote_highlight(twitchchat chat[], emotelist emotes[], int i, int emotenumb
     twitchchat emotetester[5];
     /* secback = sec you go back to check for emotes */
     /* triggernumber = how many emotes in secback to make highlight */
-    int j = 0, k, n = 0, jebaiter = 0, secback = 30, startsec, totalsec, triggernumber = 40;
+    int j = 0, k, n = 0, emotecounter = 0, secback = 30, startsec, totalsec, triggernumber = 40;
     
     totalsec = (chat[i].hour * 3600) + (chat[i].min * 60) + (chat[i].sec);
     startsec = (totalsec - secback) < 0 ? 0 : (totalsec - secback);
@@ -185,12 +204,12 @@ void emote_highlight(twitchchat chat[], emotelist emotes[], int i, int emotenumb
     }
     for(k = n; k <= i; k++){
         if(strstr(chat[k].text, emotes[emotenumber].emote)){
-            jebaiter++;
-        } 
+            emotecounter++; 
+        }
     }
 
-    if(jebaiter >= triggernumber){
+    if(emotecounter >= triggernumber){
         printf("-----HIGHLIGHT-----   ");
     }
-    printf("Jebaiter = %d  ", jebaiter);
+    printf("Counter: %d  ", emotecounter);
 }
