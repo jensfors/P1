@@ -51,14 +51,7 @@ int main(void){
     FILE *emotefile;
     emotefile = fopen("emotes.txt", "r");
 
-    /*
-    do{
-        printf("Enter number: ");
-        scanf("%d", &choice);
-
-        switch(choice){
-            case 1: highlight_options();
-            case 2: */
+  
             if(chatfile != NULL){
                 numberoflines = count_line(chatfile);
                 chat_line = (twitchchat *)malloc(numberoflines * sizeof(twitchchat));
@@ -82,11 +75,7 @@ int main(void){
             else{
                 printf("Can't open the file%s\n", "twitchchat.txt");
             }
-            /*
-        }
-    }
-    while(choice != 0);
-*/
+   
     return 0;
 }
 
