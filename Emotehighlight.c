@@ -81,7 +81,7 @@ int main(void){
 
 int get_twitch_chat(FILE *chatfile, FILE *emotefile, twitchchat chat[], emotelist emotes[], clock_t start_t, int amountofemotes){
     /* emotenumber = what emote to use for highlight in emotes.txt, 0 = Kappa, 3 = LUL */
-    static int i = 0, hour = 0, min = 0, sec = 0, emotenumber = 0;
+    static int i = 0, hour = 0, min = 0, sec = 0, emotenumber = 2;
     char line[500],
         dummystr[500];
     static clock_t end_t;
@@ -174,28 +174,50 @@ void emote_counter(twitchchat chat[], emotelist emotes[], int i, int amountofemo
 
 /* Mathias has copyright on this function Jebaited */
 void emote_highlight(twitchchat chat[], emotelist emotes[], int i, int emotenumber){
-    twitchchat emotetester[5];
+    twitchchat starttime[5];
     /* secback = sec you go back to check for emotes */
     /* triggernumber = how many emotes in secback to make highlight */
-    int j = 0, k, n = 0, emotecounter = 0, secback = 30, startsec, totalsec, triggernumber = 40;
-    
+    int j = 0, n = 0, secback = 3, startsec, totalsec, triggernumber = 40, isemote = 0, jhour, jmin, jsec, jtotalsec;
+    static int emotecounter;
+
     totalsec = (chat[i].hour * 3600) + (chat[i].min * 60) + (chat[i].sec);
     startsec = (totalsec - secback) < 0 ? 0 : (totalsec - secback);
  
-    emotetester[0].hour = startsec / 3600;
-    emotetester[0].min = (startsec / 60) % 60;
-    emotetester[0].sec = startsec % 60;
+    starttime[0].hour = startsec / 3600;
+    starttime[0].min = (startsec / 60) % 60;
+    starttime[0].sec = startsec % 60;
+    isemote = 0;
+
+    /*for(j = startsec; j <= totalsec; j++){
+        jhour = j / 3600;
+        jmin = (j / 60) % 60;
+        jsec = j % 60;
+
+        while((chat[j].hour == jhour) && (chat[j].min == jmin) && (chat[j].sec == jsec)){
+            n++;
+        }
+        printf("HELLO %d\n", n);
+    }*/
 
     for(j = 0; j < i; j++){
-        if((chat[j].hour < emotetester[0].hour) || (chat[j].min < emotetester[0].min) || (chat[j].sec < emotetester[0].sec)){
+        if((chat[j].hour < starttime[0].hour) || (chat[j].min < starttime[0].min) || (chat[j].sec < starttime[0].sec)){
             n++;
         }
     }
-    for(k = n; k <= i; k++){
-        if(strstr(chat[k].text, emotes[emotenumber].emote)){
-            emotecounter++; 
+    for(n; n < i; n++){
+        if(strstr(chat[n].text, emotes[emotenumber].emote)){
+            isemote = 1;
+            break;
         }
     }
+    if(isemote == 1){
+        emotecounter++;
+    }
+    else{
+        emotecounter = 1;
+    }
+
+
 
     if(emotecounter >= triggernumber){
         printf("-----HIGHLIGHT-----   ");
