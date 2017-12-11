@@ -52,29 +52,29 @@ int main(void){
     emotefile = fopen("emotes.txt", "r");
 
   
-            if(chatfile != NULL){
-                numberoflines = count_line(chatfile);
-                chat_line = (twitchchat *)malloc(numberoflines * sizeof(twitchchat));
-                emotes = (emotelist *)malloc(20 * sizeof(emotelist));
-        
-                make_emote_struct(emotefile, chat_line, emotes, &amountofemotes);
-        
-                if (chat_line == NULL){
-                    printf("Allocation problems. Bye.\n");
-                    exit(EXIT_FAILURE);
-                }
-                while(1){
-                    msg_nr = get_twitch_chat(chatfile, emotefile, chat_line, emotes, start_t, amountofemotes);
-                }
-                fclose(chatfile);
-                fclose(emotefile);
-                printf("\n%d\n", numberoflines);
-        
-                free(chat_line);
-            }
-            else{
-                printf("Can't open the file%s\n", "twitchchat.txt");
-            }
+    if(chatfile != NULL){
+        numberoflines = count_line(chatfile);
+        chat_line = (twitchchat *)malloc(numberoflines * sizeof(twitchchat));
+        emotes = (emotelist *)malloc(20 * sizeof(emotelist));
+
+        make_emote_struct(emotefile, chat_line, emotes, &amountofemotes);
+
+        if (chat_line == NULL){
+            printf("Allocation problems. Bye.\n");
+            exit(EXIT_FAILURE);
+        }
+        while(1){
+            msg_nr = get_twitch_chat(chatfile, emotefile, chat_line, emotes, start_t, amountofemotes);
+        }
+        fclose(chatfile);
+        fclose(emotefile);
+        printf("\n%d\n", numberoflines);
+
+        free(chat_line);
+    }
+    else{
+        printf("Can't open the file %s\n", "twitchchat2.txt");
+    }
    
     return 0;
 }
