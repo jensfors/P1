@@ -26,7 +26,7 @@ int find_questions(twitchchat test[], int n, twitchchat questions[]);
 int main(void){
     /*twitchchat test[];*/
     twitchchat *pointertest, questions[500];
-    int numberoflines = 0, msg_nr = 0, question_nr = 0;
+    int numberoflines = 0, msg_nr = 0, question_nr_curr = 0, question_nr_prev, k = 0;
     const clock_t start_t = clock();
 
     FILE *ifp;
@@ -43,7 +43,12 @@ int main(void){
         while(1){
             //Sleep(50);
             msg_nr = get_twitch_chat(ifp, pointertest, start_t);
-            question_nr = find_questions(pointertest, msg_nr, questions);        
+            question_nr_curr = find_questions(pointertest, msg_nr, questions);
+            if(question_nr_curr != question_nr_prev && question_nr_curr){
+                printf("%s\n", questions[question_nr_curr - 1].text);
+            }
+            question_nr_prev = question_nr_curr;
+
         }
         fclose(ifp);
         printf("\n%d\n", numberoflines);
@@ -126,13 +131,10 @@ int find_questions(twitchchat test[], int n, twitchchat questions[]){
     char curr[MAX];
     static char prev[MAX];
     strcpy(curr, test[n].text);
-    if(prev != NULL && strcmp(curr, prev) != 0){
-        for(i = length; i > 0; i--){
-            if(test[n].text[i] == '?'){
-                questions[j] = test[n];
-                printf("%s\n", questions[j].text);
-                j++;
-            }
+    if(!(prev == NULL || strcmp(curr, prev) == 0)){
+        if(strchr(curr, '?')){
+            questions[j] = test[n];
+            j++;
         }
     }
     strcpy(prev,test[n].text);
