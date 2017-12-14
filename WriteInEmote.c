@@ -61,15 +61,17 @@ int main(void){
     
     
     do{
-        printf("Press 1 to type emote \nPress 2 to kill yourself \nEnter: ");
+        printf("Press 1 to type emote \nPress 2 To run through chat \nEnter: ");
         scanf("%d", &input);
         switch(input){
-            case 1: ofpemotefile = fopen("emotetwitch2.txt", "w"); 
+            /* Case 1: Indskriv emotes til emotefil */
+            case 1: ofpemotefile = fopen("emotetwitch.txt", "w"); 
                     emote_to_file(ofpemotefile); 
                     fclose(ofpemotefile);
-                    ifpemotefile = fopen("emotetwitch2.txt", "r");
+                    ifpemotefile = fopen("emotetwitch.txt", "r");
                     make_emote_struct(ifpemotefile, emotelist, &amountofemotes); 
                     print_struct(emotelist, amountofemotes); fclose(ifpemotefile); break; 
+            /* Case 2: Kør resten af programmet */
             case 2: LUL = 1; break;
         }
     }
@@ -80,8 +82,10 @@ int main(void){
         numberoflines = count_line(ifp);
         chat_struct = (twitchchat *)malloc(numberoflines * sizeof(twitchchat));
 
-        ifpemotefile = fopen("emotetwitch2.txt", "r");
+        /* Åbner filen med emotes */
+        ifpemotefile = fopen("emotetwitch.txt", "r");
         make_emote_struct(ifpemotefile, emotelist, &amountofemotes); 
+        printf("Highlight Emotes:\n");
         print_struct(emotelist, amountofemotes);
 
         if(chat_struct == NULL){
@@ -89,7 +93,7 @@ int main(void){
             exit(EXIT_FAILURE);
         }
 
-        printf("DEAD");
+        printf("Printing emote use pr 30 sec in outputtwitch.txt");
         get_twitch_chat(ifp, chat_struct);
         for(j = 0; j < amountofemotes; j++){
             for(i = 0; i < SUMTING; i++){
@@ -99,7 +103,6 @@ int main(void){
 
         i = 0;
         j = 0;
-
 
         startsec = chat_struct[i].hour * SEC_PR_HOUR + chat_struct[i].min * SEC_PR_MIN + chat_struct[i].sec;
         totalsec = startsec + 30;
@@ -176,23 +179,26 @@ void print_to_file(FILE *ofp, message messages[], emoticon **emotelist, int amou
     fclose(ofp);
 }
 
-
+/* Funktion hvor brugeren kan skrive higlight emotes/ord */
 void emote_to_file(FILE *emotefile){
-    char emotename[20];
-    
+    char emotename[MAX_EMOTES];
     do{
         printf("\nType emote or EXIT: ");
             scanf("%s", emotename);
             if(strcmp(emotename, "EXIT") != 0){
+                /* Skriver emoten/teksten til filen */
                 fprintf(emotefile, "%s\n", emotename);
             }
         }
+        /* Kører indtil brugeren skriver EXIT */
         while(strcmp(emotename, "EXIT") != 0);
 }
 
+/* Funktion der indlæser emotesne fra emotefilen til en struct */
 void make_emote_struct(FILE *emotefile, emoticon **emotelist, int *amountofemotes){
     int k = 0;
     char line[20];
+    /* Indlæser linjer indtil der ikke er flere emotes */
     while(fgets(line, sizeof(line), emotefile) != NULL){
         sscanf(line, " %20[^\n]", emotelist[k][0].name);
         emotelist[k][0].counter = 0;
@@ -201,9 +207,10 @@ void make_emote_struct(FILE *emotefile, emoticon **emotelist, int *amountofemote
     *amountofemotes = k;
 }
 
+/* Funktion der kan udskrive de valgte emotes til higlight */
 void print_struct(emoticon **emotelist, int amountofemotes){
     int i;
     for(i = 0; i < amountofemotes; i++){
-        printf("%d: %s\n", emotelist[i][0].counter, emotelist[i][0].name);
+        printf("%s\n", emotelist[i][0].name);
     }
 }
