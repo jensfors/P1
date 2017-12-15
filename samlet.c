@@ -39,7 +39,7 @@ int count_line(FILE *chatfile);
 void emote_counter(twitchchat chat[], emotelist *emoticon, int i, int amountofemotes);
 void emote_highlight(twitchchat chat[], emotelist *emoticon, int i);
 int find_questions(twitchchat test[], int n, twitchchat questions[]);
-void print_emote_counter(emotelist *emoticon, int msg_nr);
+void print_emote_counter(emotelist *emoticon, int msg_nr, int amountofemotes);
 int is_highlight();
 
 void print_to_file(FILE *ofp, message messages[], emotelist *emoticon, int amountofemotes);
@@ -99,7 +99,7 @@ int main(void){
             msg_nr = get_twitch_chat(chatfile, emotefile, chat_line, emoticon, start_t, amountofemotes);
             emote_highlight(chat_line, emoticon, msg_nr - 1);
             if(msg_nr != prev_msg_nr){
-                print_emote_counter(emoticon, msg_nr - 1);
+                print_emote_counter(emoticon, msg_nr - 1, amountofemotes);
                 printf("%d\t[%s %d:%d:%d UTC] %s: %s\n", msg_nr - 1, chat_line[msg_nr - 1].date,
                    chat_line[msg_nr - 1].hour,
                    chat_line[msg_nr - 1].min,
@@ -137,7 +137,9 @@ int get_twitch_chat(FILE *chatfile, FILE *emotefile, twitchchat chat[], emotelis
     end_t = clock();
     timer(&hour, &min, &sec, start_t, end_t);
 
-    /* printf("%d:%d:%d  ", hour, min, sec); */ 
+    Sleep(20);
+
+    /*printf("%d:%d:%d  ", hour, min, sec); */
     if(fgets(line, sizeof(line), chatfile) != NULL){
         sscanf(line, " [%s %d:%d:%d UTC] %[^:]: %500[^\n]",
                chat[i].date,
@@ -253,12 +255,12 @@ void emote_highlight(twitchchat chat[], emotelist *emoticon, int i){
 
 }
 
-void print_emote_counter(emotelist *emoticon, int msg_nr){
+void print_emote_counter(emotelist *emoticon, int msg_nr, int amountofemotes){
     int i;
     static int prev_msg_nr;
 
     if(msg_nr != prev_msg_nr){
-        for(i = 0; i < 19; i++){
+        for(i = 0; i < amountofemotes; i++){
             if(emoticon[i].emotecount > 20){
                 printf("%s: %d\t", emoticon[i].emote, emoticon[i].emotecount);
             }
