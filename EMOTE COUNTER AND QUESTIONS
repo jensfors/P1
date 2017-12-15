@@ -177,7 +177,7 @@ void emote_highlight(twitchchat chat[], emotelist emotes[], int i){
     /* secback = sec you go back to check for emotes */
     /* triggernumber = how many emotes in secback to make highlight */
     int j = 0, k, n = 0, secback = 20, startsec, totalsec, emotefound = 0,
-        emotenumber, hour, min, sec, dummy, prev_msg_nr = 0;
+        emotenumber, hour, min, sec, dummy, prev_msg_nr;
     
     totalsec = (chat[i].hour * 3600) + (chat[i].min * 60) + (chat[i].sec);
     startsec = (totalsec - secback) < 0 ? 0 : (totalsec - secback);
