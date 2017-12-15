@@ -54,11 +54,11 @@ int main(void){
     twitchchat *chat_line, questions[500];
     emotelist *emotes;
     int numberoflines = 0, msg_nr, amountofemotes = 0, question_nr_curr, question_nr_prev, prev_msg_nr, input, LUL;
-    const clock_t start_t = clock();
     emotelist *emoticon = (emotelist*)malloc(110000 * sizeof(emotelist));
     emotelist *emotedummy = (emotelist*)malloc(MAX_EMOTES * sizeof(emotelist));
     message *messages = (message*)malloc(SUMTING * sizeof(message));
-    
+    const clock_t start_t = clock();
+
     FILE *chatfile;
     FILE *emotefile;
     FILE *ifpemotefile;
@@ -86,10 +86,10 @@ int main(void){
         make_emote_struct(ifpemotefile, emoticon, &amountofemotes); 
         printf("Highlight Emotes:\n");
         print_struct(emoticon, amountofemotes);
+        printf("\n");
 
         numberoflines = count_line(chatfile);
         chat_line = (twitchchat *)malloc(numberoflines * sizeof(twitchchat));
-        // emotes = (emotelist *)malloc(MAX_EMOTES * sizeof(emotelist));
 
         if(chat_line == NULL){
             printf("Allocation problems. Bye.\n");
@@ -137,7 +137,7 @@ int get_twitch_chat(FILE *chatfile, FILE *emotefile, twitchchat chat[], emotelis
     end_t = clock();
     timer(&hour, &min, &sec, start_t, end_t);
 
-    /*printf("%d:%d:%d  ", hour, min, sec); */
+    /* printf("%d:%d:%d  ", hour, min, sec); */ 
     if(fgets(line, sizeof(line), chatfile) != NULL){
         sscanf(line, " [%s %d:%d:%d UTC] %[^:]: %500[^\n]",
                chat[i].date,
