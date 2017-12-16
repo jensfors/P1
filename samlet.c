@@ -32,12 +32,12 @@ typedef struct message{
     int counter;
 } message;
 
-int get_twitch_chat(FILE *chatfile, FILE *emotefile, twitchchat chat[],  emotelist *emoticon, clock_t start_t, int amountofemotes);
+int get_twitch_chat(FILE *chatfile, twitchchat chat[],  emotelist *emoticon, clock_t start_t, int amountofemotes);
 void timer(int *hour, int *min, int *sec, clock_t start_t, clock_t end_t);
 int count_line(FILE *chatfile);
 /*void make_emote_struct(FILE *emotefile, twitchchat chat[], emotelist emotes[], int *amountofemotes);*/
 void emote_counter(twitchchat chat[], emotelist *emoticon, int i, int amountofemotes);
-void emote_highlight(twitchchat chat[], emotelist *emoticon, int i);
+void emote_highlight(twitchchat chat[], emotelist *emoticon, int i, int amountofemotes);
 int find_questions(twitchchat test[], int n, twitchchat questions[]);
 void print_emote_counter(emotelist *emoticon, int msg_nr, int amountofemotes);
 int is_highlight();
@@ -61,7 +61,7 @@ int main(void){
     emotelist *emoticon = (emotelist*)malloc(MAX_EMOTES * sizeof(emotelist));
     emotelist *emotedummy = (emotelist*)malloc(MAX_EMOTES * sizeof(emotelist));
     message *messages = (message*)malloc(SUMTING * sizeof(message));
-    const clock_t start_t = clock();
+    clock_t start_t;
 
     FILE *chatfile;
     FILE *emotefile;
@@ -80,7 +80,7 @@ int main(void){
             case 2: savechat = choose_file_name(savechatfile);
                     printf("Chat log will be saved to: %s\n", savechatfile); menu = 0; break;
             /* Case 3: Kør resten af programmet */
-            case 3: menu = 1; break;
+            case 3: menu = 1; start_t = clock(); break;
             default: menu = 0; break;
         }
     }
@@ -97,14 +97,15 @@ int main(void){
 
         numberoflines = count_line(chatfile);
         chat_line = (twitchchat *)malloc(numberoflines * sizeof(twitchchat));
+    
 
         if(chat_line == NULL){
             printf("Allocation problems. Bye.\n");
             exit(EXIT_FAILURE);
         }
         while(1){
-            msg_nr = get_twitch_chat(chatfile, emotefile, chat_line, emoticon, start_t, amountofemotes);
-            emote_highlight(chat_line, emoticon, msg_nr - 1);
+            msg_nr = get_twitch_chat(chatfile, chat_line, emoticon, start_t, amountofemotes);
+            emote_highlight(chat_line, emoticon, msg_nr - 1, amountofemotes);
             if(msg_nr != prev_msg_nr){
                 print_emote_counter(emoticon, msg_nr - 1, amountofemotes);
                 printf("%d\t[%s %d:%d:%d UTC] %s: %s\n", 
@@ -114,7 +115,7 @@ int main(void){
                    chat_line[msg_nr - 1].min,
                    chat_line[msg_nr - 1].sec,
                    chat_line[msg_nr - 1].username,
-                   chat_line[msg_nr - 1].text);    
+                   chat_line[msg_nr - 1].text);   
             }
             prev_msg_nr = msg_nr;                   
 
@@ -150,17 +151,17 @@ int main(void){
     return 0;
 }
 
-int get_twitch_chat(FILE *chatfile, FILE *emotefile, twitchchat chat[], emotelist *emoticon, clock_t start_t, int amountofemotes){
+int get_twitch_chat(FILE *chatfile, twitchchat chat[], emotelist *emoticon, clock_t start_t, int amountofemotes){
     /* emotenumber = what emote to use for highlight in emotes.txt, 0 = Kappa, 3 = LUL */
     static int i = 0, hour = 0, min = 0, sec = 0;
     char line[500],
         dummystr[500];
     static clock_t end_t;
     end_t = clock();
-    timer(&hour, &min, &sec, start_t, end_t);
+    timer(&hour, &min, &sec, start_t, end_t); 
 
-
-    printf("%d:%d:%d  ", hour, min, sec);
+    /*printf("i = %d ", i);
+    printf("%d:%d:%d  ", hour, min, sec);*/
     if(fgets(line, sizeof(line), chatfile) != NULL){
         sscanf(line, " [%s %d:%d:%d UTC] %[^:]: %500[^\n]",
                chat[i].date,
@@ -182,6 +183,7 @@ int get_twitch_chat(FILE *chatfile, FILE *emotefile, twitchchat chat[], emotelis
         /*printf("%d\n", strlen(dummystr));
         printf("%ld\n", ftell(chatfile));*/
     }
+    
 
     return i;
 }
@@ -189,15 +191,15 @@ int get_twitch_chat(FILE *chatfile, FILE *emotefile, twitchchat chat[], emotelis
 void timer(int *hour, int *min, int *sec, clock_t start_t, clock_t end_t){
     static int i = 0;
     clock_t total_t;
-
-    if(end_t / CLOCKS_PER_SEC == i){
+    
+    /*if(end_t / CLOCKS_PER_SEC == i){ */
         end_t = clock();
         total_t = (double)((end_t - start_t) / CLOCKS_PER_SEC) + STARTSEC + STARTMIN * 60 + STARTHOUR * 60 * 60;
         *sec = total_t % 60;
         *min = (total_t / 60) % 60;
         *hour = total_t / 3600;
         i++;
-    }
+    
 }
 
 int count_line(FILE *chatfile){
@@ -232,7 +234,7 @@ void make_emote_struct(FILE *emotefile, twitchchat chat[], emotelist emotes[], i
 }*/
 
 /* Mathias has copyright on this function Jebaited */
-void emote_highlight(twitchchat chat[], emotelist *emoticon, int i){
+void emote_highlight(twitchchat chat[], emotelist *emoticon, int i, int amountofemotes){
     /* secback = sec you go back to check for emotes */
     /* triggernumber = how many emotes in secback to make highlight */
     int j = 0, k, n = 0, secback = 20, startsec, totalsec, emotefound = 0,
@@ -252,7 +254,7 @@ void emote_highlight(twitchchat chat[], emotelist *emoticon, int i){
                 n++;
             }
         }
-        for(emotenumber = 0; emotenumber < 20; emotenumber++){
+        for(emotenumber = 0; emotenumber < amountofemotes; emotenumber++){
             emotefound = 0;
             if(strstr(chat[i].text, emoticon[emotenumber].emote)){
                 for(k = n; k < i; k++){
