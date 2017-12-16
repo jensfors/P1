@@ -49,12 +49,16 @@ void print_struct(emotelist *emoticon, int amountofemotes);
 void emote_option(emotelist *emoticon, emotelist *emotedummy);
 void emote_option_function(emotelist *emoticon, emotelist *emotedummy, int amountofemotes);
 
+int choose_file_name(char savefile[]);
+void save_to_file(twitchchat savestruct[], char savefile[], int numberoflines);
+
 
 int main(void){
     twitchchat *chat_line, questions[500];
     emotelist *emotes;
-    int numberoflines = 0, msg_nr, amountofemotes = 0, question_nr_curr, question_nr_prev, prev_msg_nr, input, LUL;
-    emotelist *emoticon = (emotelist*)malloc(110000 * sizeof(emotelist));
+    int numberoflines = 0, msg_nr, amountofemotes = 0, question_nr_curr, question_nr_prev, prev_msg_nr, input, menu, savechat = 0, i, j;
+    char savechatfile[30], txt[5] = ".txt";
+    emotelist *emoticon = (emotelist*)malloc(MAX_EMOTES * sizeof(emotelist));
     emotelist *emotedummy = (emotelist*)malloc(MAX_EMOTES * sizeof(emotelist));
     message *messages = (message*)malloc(SUMTING * sizeof(message));
     const clock_t start_t = clock();
@@ -64,20 +68,23 @@ int main(void){
     FILE *ifpemotefile;
 
     chatfile = fopen("twitchchat2.txt", "r");
-    //emotefile = fopen("emotes.txt", "r");
 
     do{
-        printf("Press 1 to type emote \nPress 2 To run through chat \nEnter: ");
+        printf("\nPress (1) to choose highlight emote \nPress (2) To save the chatlog to a txt file \nPress (3) To start live chat \nEnter: ");
         scanf("%d", &input);
+
         switch(input){
             /* Case 1: Indskriv emotes til emotefil */
-            case 1: emote_option(emoticon, emotedummy); break; 
-            /* Case 2: Kør resten af programmet */
-            case 2: LUL = 1; break;
-            default: LUL = 0; break;
+            case 1: emote_option(emoticon, emotedummy); menu = 0; break; 
+            /* Case 2: Indskriv filnavnet hvor chatloggen skal gemmes på*/
+            case 2: savechat = choose_file_name(savechatfile);
+                    printf("Chat log will be saved to: %s\n", savechatfile); menu = 0; break;
+            /* Case 3: Kør resten af programmet */
+            case 3: menu = 1; break;
+            default: menu = 0; break;
         }
     }
-    while(LUL == 0);
+    while(menu == 0);
   
     if(chatfile != NULL){
 
@@ -100,23 +107,38 @@ int main(void){
             emote_highlight(chat_line, emoticon, msg_nr - 1);
             if(msg_nr != prev_msg_nr){
                 print_emote_counter(emoticon, msg_nr - 1, amountofemotes);
-                printf("%d\t[%s %d:%d:%d UTC] %s: %s\n", msg_nr - 1, chat_line[msg_nr - 1].date,
+                printf("%d\t[%s %d:%d:%d UTC] %s: %s\n", 
+                   msg_nr - 1, 
+                   chat_line[msg_nr - 1].date,
                    chat_line[msg_nr - 1].hour,
                    chat_line[msg_nr - 1].min,
                    chat_line[msg_nr - 1].sec,
                    chat_line[msg_nr - 1].username,
                    chat_line[msg_nr - 1].text);    
             }
-            prev_msg_nr = msg_nr;
+            prev_msg_nr = msg_nr;                   
 
             /*question_nr_curr = find_questions(chat_line, msg_nr, questions);
             if(question_nr_curr != question_nr_prev && question_nr_curr){
                 printf("%s\n", questions[question_nr_curr - 1].text);
             }
             question_nr_prev = question_nr_curr;*/
-        
-
         }
+        if(savechat == 1){
+            save_to_file(chat_line, savechatfile, numberoflines);
+        }
+        else if(savechat == 0){
+            strcpy(savechatfile, chat_line[0].date);
+            for(i = 0; savechatfile[i] != '\0'; i++);
+            for(j = 0; txt[j] != '\0'; ++j, ++i)
+            {
+                savechatfile[i] = txt[j];
+            }
+            savechatfile[i] = '\0';
+            save_to_file(chat_line, savechatfile, numberoflines);
+        }
+
+
         fclose(chatfile);
         fclose(emotefile);
         free(chat_line);
@@ -137,9 +159,8 @@ int get_twitch_chat(FILE *chatfile, FILE *emotefile, twitchchat chat[], emotelis
     end_t = clock();
     timer(&hour, &min, &sec, start_t, end_t);
 
-    Sleep(20);
 
-    /*printf("%d:%d:%d  ", hour, min, sec); */
+    /* printf("%d:%d:%d  ", hour, min, sec);*/ 
     if(fgets(line, sizeof(line), chatfile) != NULL){
         sscanf(line, " [%s %d:%d:%d UTC] %[^:]: %500[^\n]",
                chat[i].date,
@@ -290,11 +311,6 @@ int is_highlight(){
     return 1;
 }
 
-
-
-
-
-
 void emote_option(emotelist *emoticon, emotelist *emotedummy){
     int amountofemotes = 0, input, breaker;
 
@@ -339,7 +355,7 @@ void emote_to_file(FILE *emotefile, emotelist *emotedummy, int *amountofemotes){
         fprintf(emotefile, "%s\n", emotedummy[i].emote);
     }
     do{
-        printf("\nType emote or EXIT: ");
+        printf("\nType emotename or EXIT: ");
             scanf("%s", emotename);
             if(strcmp(emotename, "EXIT") != 0){
                 /* Skriver emoten/teksten til filen */
@@ -370,3 +386,41 @@ void print_struct(emotelist *emoticon, int amountofemotes){
         printf("%s\n", emoticon[i].emote);
     }
 }
+
+/* Funktion hvor man vælger den fil chatlogen skal gemmes på */
+int choose_file_name(char savefile[]){
+    int i, j, res;
+    char txt[5] = ".txt";
+
+    printf("Please type in the name of the .txt file the chatlog will be saved to. \nEnter name here: ");
+    scanf("%s", savefile);
+
+    /* Filnavnet for sat '.txt' på enden */
+    for(i = 0; savefile[i] != '\0'; i++);
+    for(j = 0; txt[j] != '\0'; ++j, ++i)
+    {
+        savefile[i] = txt[j];
+    }
+    savefile[i] = '\0';
+    res = 1;
+    
+    return res;
+}
+
+/* Funktion der udskriver chatlogen til den valgte fil af brugeren */
+void save_to_file(twitchchat savestruct[], char savefile[], int numberoflines){
+    int i;
+    FILE *ofp;
+    ofp = fopen(savefile, "w");
+
+    for(i = 0; i < numberoflines; i++){
+        fprintf(ofp, "[%s %d:%d:%d UTC] %s: %s\n", 
+        savestruct[i].date,
+        savestruct[i].hour,
+        savestruct[i].min,
+        savestruct[i].sec,
+        savestruct[i].username,
+        savestruct[i].text);    
+    }
+}
+
