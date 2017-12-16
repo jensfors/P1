@@ -160,7 +160,7 @@ int get_twitch_chat(FILE *chatfile, FILE *emotefile, twitchchat chat[], emotelis
     timer(&hour, &min, &sec, start_t, end_t);
 
 
-    /* printf("%d:%d:%d  ", hour, min, sec);*/ 
+    printf("%d:%d:%d  ", hour, min, sec);
     if(fgets(line, sizeof(line), chatfile) != NULL){
         sscanf(line, " [%s %d:%d:%d UTC] %[^:]: %500[^\n]",
                chat[i].date,
