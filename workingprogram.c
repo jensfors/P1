@@ -40,13 +40,14 @@ int is_highlight();
 void emote_to_file(FILE *emotefile, emotelist *emotedummy, int *amountofemotes);
 void make_emote_struct(FILE *emotefile, emotelist *emoticon, int *amountofemotes);
 void print_struct(emotelist *emoticon, int amountofemotes);
-void emote_option(emotelist *emoticon, emotelist *emotedummy);
+void emote_menu(emotelist *emoticon, emotelist *emotedummy);
 void emote_option_function(emotelist *emoticon, emotelist *emotedummy, int amountofemotes);
 void print_it_all(twitchchat chat[], twitchchat questions[], emotelist *emoticon, int msg_nr, int question_nr, int amountofemotes);
 int choose_file_name(char savefile[]);
 void save_to_file(twitchchat savestruct[], char savefile[], int numberoflines);
 void add_txt_to_filename(char savefile[]);
 void set_default_emotes(emotelist standard_emotes[]);
+void chatfile_menu(char twitchchatfile[], int *loadchat);
 
 
 int main(void){
@@ -68,15 +69,13 @@ int main(void){
 
         switch(input){
             /* Case 1: Indskriv emotes til emotefil */
-            case 1: emote_option(emoticon, emotedummy); menu = 0; break; 
+            case 1: emote_menu(emoticon, emotedummy); menu = 0; break; 
             /* Case 2: Indskriv filnavnet hvor chatloggen skal gemmes på*/
             case 2: printf("Please type in the name of the .txt file the chatlog will be saved to"); 
                     savechat = choose_file_name(savechatfile);
                     printf("Chat log will be saved to: %s\n", savechatfile); menu = 0; break;
             /* Case 3: Indlæs fra chatten fra en anden fil */
-            case 3: printf("Please type in the name of the .txt file the chat will be loaded from"); 
-                    loadchat = choose_file_name(twitchchatfile);
-                    printf("Chat will be loaded from %s\n", twitchchatfile); menu = 0; break;
+            case 3: chatfile_menu(twitchchatfile, &loadchat); menu = 0; break;
             /* Case 4: Kør resten af programmet */
             case 4: menu = 1; start_t = clock(); break;
             default: menu = 0; break;
@@ -84,11 +83,11 @@ int main(void){
     }
     while(menu == 0);
 
-    if(loadchat == 1){
+    if(loadchat == 2){
         printf("Loading chat from: %s\n", twitchchatfile);
         chatfile = fopen(twitchchatfile, "r");
     }
-    else if(loadchat == 0){
+    else if(loadchat == 1){
         printf("Loading chat from: %s\n", std_chatfile);
         chatfile = fopen(std_chatfile, "r");
     }
@@ -286,7 +285,7 @@ int is_highlight(){
     return 1;
 }
 
-void emote_option(emotelist *emoticon, emotelist *emotedummy){
+void emote_menu(emotelist *emoticon, emotelist *emotedummy){
     int amountofemotes = 0, input, breaker, i;
     emotelist standard_emotes[5];
 
@@ -404,6 +403,29 @@ int choose_file_name(char savefile[]){
     
     return res;
 }
+
+void chatfile_menu(char twitchchatfile[], int *loadchat){
+    int input, menu;
+
+    printf("\nChoose what chatfile to load the chat from \n(1) Current streamfile \n(2) Choose custom file \nEnter: ");
+    scanf("%d", &input);
+
+    do{
+        switch(input){
+            case 1: *loadchat = 1; menu = 1; break;
+            case 2: *loadchat = 2; menu = 1; 
+                    printf("Please type in the name of the .txt file the chat will be loaded from"); 
+                    choose_file_name(twitchchatfile);
+                    printf("Chat will be loaded from %s\n", twitchchatfile); break;
+            default: menu = 0; break; 
+        }
+    }
+    while(menu != 1);
+}
+
+
+
+
 
 /* Funktion der udskriver chatlogen til den valgte fil af brugeren */
 void save_to_file(twitchchat savestruct[], char savefile[], int numberoflines){
