@@ -32,7 +32,7 @@ int get_twitch_chat(FILE *chatfile, twitchchat chat[],  emotelist *emoticon, clo
 void timer(int *hour, int *min, int *sec, clock_t start_t, clock_t end_t);
 int count_line(FILE *chatfile);
 void emote_counter(twitchchat chat[], emotelist *emoticon, int i, int amountofemotes);
-void emote_highlight(twitchchat chat[], emotelist *emoticon, int i, int amountofemotes);
+void emote_streak(twitchchat chat[], emotelist *emoticon, int i, int amountofemotes);
 int find_questions(twitchchat test[], int n, twitchchat questions[]);
 void print_emote_counter(emotelist *emoticon, int msg_nr, int amountofemotes, int input);
 int is_highlight(twitchchat chat[], emotelist emoticon[], twitchchat highlights[], int msg_nr, int numberoflines, int amountofemotes);
@@ -196,7 +196,7 @@ int main(void){
         }
         while(1){
             msg_nr = get_twitch_chat(chatfile, chat_line, emoticon, start_t, amountofemotes);
-            emote_highlight(chat_line, emoticon, msg_nr - 1, amountofemotes);
+            emote_streak(chat_line, emoticon, msg_nr - 1, amountofemotes);
             question_nr = find_questions(chat_line, msg_nr - 1, questions);
             highlight_nr = is_highlight(chat_line, emoticon, highlights, msg_nr - 1, numberoflines, amountofemotes);
             print_it_all(chat_line, questions, emoticon, highlights, msg_nr - 1, question_nr, amountofemotes, highlight_nr, what_to_print);
@@ -277,7 +277,7 @@ int count_line(FILE *chatfile){
 }
 
 /* Mathias has copyright on this function Jebaited */
-void emote_highlight(twitchchat chat[], emotelist *emoticon, int i, int amountofemotes){
+void emote_streak(twitchchat chat[], emotelist *emoticon, int i, int amountofemotes){
     /* secback = sec you go back to check for emotes */
     /* triggernumber = how many emotes in secback to make highlight */
     int j = 0, k, n = 0, secback = 10, startsec, totalsec, emotefound = 0,
