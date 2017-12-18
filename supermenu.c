@@ -40,28 +40,39 @@ int is_highlight();
 void emote_to_file(FILE *emotefile, emotelist *emotedummy, int *amountofemotes);
 void make_emote_struct(FILE *emotefile, emotelist *emoticon, int *amountofemotes);
 void print_struct(emotelist *emoticon, int amountofemotes);
-void emote_menu(emotelist *emoticon, emotelist *emotedummy);
+void emote_menu(emotelist *emoticon, emotelist *emotedummy, emotelist *standard_emotes, int amount_std_emote);
 void emote_option_function(emotelist *emoticon, emotelist *emotedummy, int amountofemotes);
 void print_it_all(twitchchat chat[], twitchchat questions[], emotelist *emoticon, int msg_nr, int question_nr, int amountofemotes);
 int choose_file_name(char savefile[]);
 void save_to_file(twitchchat savestruct[], char savefile[], int numberoflines);
 void add_txt_to_filename(char savefile[]);
-void set_default_emotes(emotelist standard_emotes[]);
+void set_default_emotes(emotelist standard_emotes[], int amount_std_emote);
 void chatfile_menu(char twitchchatfile[], int *loadchat);
+void ctrl_f(twitchchat chat[], int numberoflines);
+void get_offline_chat(twitchchat offlinechat[], FILE *chatfile);
+void startup_default_emotes(emotelist standard_emotes[], int *amount_std_emote);
+void print_from_file();
 
 
 int main(void){
-    twitchchat *chat_line, questions[500];
+    twitchchat *chat_line, questions[500], *offlinechat;
     int numberoflines = 0, msg_nr, amountofemotes = 0, question_nr, offlineinput, maininput, mainmenu, offlinemenu, onlinemenu, 
-        savechat = 0, loadchat = 1, offline = 0, online = 0, onlineinput;
+        savechat = 0, loadchat = 1, offline = 0, online = 0, onlineinput, offline_numberoflines = 0, amount_std_emote;
     char savechatfile[30], twitchchatfile[30], std_chatfile[30] = "twitchchat2.txt";
     emotelist *emoticon = (emotelist*)malloc(MAX_EMOTES * sizeof(emotelist));
     emotelist *emotedummy = (emotelist*)malloc(MAX_EMOTES * sizeof(emotelist));
+    emotelist *standard_emotes = (emotelist*)malloc(MAX_EMOTES * sizeof(emotelist));
     clock_t start_t;
 
     FILE *chatfile;
     FILE *emotefile;
     FILE *ifpemotefile;
+
+    emotefile = fopen("emotetwitch.txt", "w");
+    startup_default_emotes(standard_emotes, &amount_std_emote);
+    set_default_emotes(standard_emotes, amount_std_emote);
+    make_emote_struct(emotefile, emoticon, &amount_std_emote);
+    fclose(emotefile);
 
     do{
         /* Main menu */
@@ -83,7 +94,7 @@ int main(void){
 
                 switch(onlineinput){
                     /* Case 1: Indskriv emotes til emotefil */
-                    case 1: emote_menu(emoticon, emotedummy); onlinemenu = 0; break; 
+                    case 1: emote_menu(emoticon, emotedummy, standard_emotes, amount_std_emote); onlinemenu = 0; break; 
                     /* Case 2: Gem chatloggen til en custom fil */
                     case 2: printf("Please type in the name of the .txt file the chatlog will be saved to"); 
                             savechat = choose_file_name(savechatfile);
@@ -115,11 +126,25 @@ int main(void){
 
                 switch(offlineinput){
                     /* Case 1: Indskriv emotes til emotefil */
-                    case 1: emote_menu(emoticon, emotedummy); offlinemenu = 0; break; 
+                    case 1: emote_menu(emoticon, emotedummy, standard_emotes, amount_std_emote); offlinemenu = 0; break; 
                     /* Case 2: Vælg hvilken fil chatten skal læses fra */
-                    case 2: chatfile_menu(twitchchatfile, &loadchat); offlinemenu = 0; break;
+                    case 2: chatfile_menu(twitchchatfile, &loadchat);
+                    if(loadchat == 2){
+                        printf("Loading chat from: %s\n", twitchchatfile);
+                        chatfile = fopen(twitchchatfile, "r");
+                    }
+                    else if(loadchat == 1){
+                        printf("Loading chat from: %s\n", std_chatfile);
+                        chatfile = fopen(std_chatfile, "r");
+                    }
+                    offline_numberoflines = count_line(chatfile);
+                    offlinechat = (twitchchat *)malloc(offline_numberoflines * sizeof(twitchchat));
+                    get_offline_chat(offlinechat, chatfile);
+                    offlinemenu = 0; break;
                     /* Case 3: Søg efter noget i chatten */
-                    case 3: printf("Searching chat\n"); offlinemenu = 0; break;
+                    case 3: printf("Searching chat\n"); 
+                    ctrl_f(offlinechat, offline_numberoflines);
+                    offlinemenu = 0; break;
                     /* Case 4: Vis alle spørgsmål fra filen */
                     case 4: printf("Showing questions\n"); offlinemenu = 0; break;
                     /* Case 5: Vis alle steder hvor der var highlights */
@@ -170,7 +195,6 @@ int main(void){
             question_nr = find_questions(chat_line, msg_nr - 1, questions);
             print_it_all(chat_line, questions, emoticon, msg_nr, question_nr, amountofemotes);
         }
-        
         /* Gemmer chatlogen til den angivet fil ellers dato.txt */
         if(savechat == 1){
             save_to_file(chat_line, savechatfile, numberoflines);
@@ -228,6 +252,24 @@ int get_twitch_chat(FILE *chatfile, twitchchat chat[], emotelist *emoticon, cloc
     
 
     return i;
+}
+
+void get_offline_chat(twitchchat offlinechat[], FILE *chatfile){
+    char line[600];
+    int i = 0;
+
+    while(fgets(line, sizeof(line), chatfile) != NULL){
+        sscanf(line, " [%s %d:%d:%d UTC] %[^:]: %600[^\n]",
+               offlinechat[i].date,
+               &offlinechat[i].hour,
+               &offlinechat[i].min,
+               &offlinechat[i].sec,
+               offlinechat[i].username,
+               offlinechat[i].text);
+        //sscanf(line, " %[^\n]", dummystr);
+        i++; 
+
+    }
 }
 
 void timer(int *hour, int *min, int *sec, clock_t start_t, clock_t end_t){
@@ -326,7 +368,10 @@ int find_questions(twitchchat test[], int n, twitchchat questions[]){
     static char prev[MAX];
     strcpy(curr, test[n].text);
     if(!(prev == NULL || strcmp(curr, prev) == 0)){
-        if(strchr(curr, '?')){
+        if(strstr(curr, "????")){
+            return j;
+        }
+        else if(strchr(curr, '?')){
             questions[j] = test[n];
             j++;
         }
@@ -340,20 +385,15 @@ int is_highlight(){
     return 1;
 }
 
-void emote_menu(emotelist *emoticon, emotelist *emotedummy){
-    int amountofemotes = 0, input, breaker, i;
-    emotelist standard_emotes[5];
-
-    strcpy(standard_emotes[0].emote, "PogChamp");
-    strcpy(standard_emotes[1].emote, "Kappa");
-    strcpy(standard_emotes[2].emote, "LUL");
-    strcpy(standard_emotes[3].emote, "monkaS");
-    strcpy(standard_emotes[4].emote, "Jebaited");
+void emote_menu(emotelist *emoticon, emotelist *emotedummy, emotelist *standard_emotes, int amount_std_emote){
+    int amountofemotes = 0, input, breaker, i = 0;
 
     FILE *dummyfile;
+    
 
     do{
-        printf("(1) Delete all emotes and add new ones \n(2) Add extra emotes \n(3) Set emotes to standard emotes \n(4) Show standard emotes \n(5) BACK \nEnter: ");
+        printf("(1) Delete all emotes and add new ones \n(2) Add extra emotes \n(3) Set emotes to standard emotes" 
+               "\n(4) Show standard emotes \n(5) Show current emotes \n(6) BACK \nEnter: ");
         scanf("%d", &input); 
 
         switch(input){
@@ -366,7 +406,7 @@ void emote_menu(emotelist *emoticon, emotelist *emotedummy){
                     breaker = 1; break;
 
             case 3: printf("\nSetting emotes to default\n");
-                    set_default_emotes(standard_emotes);
+                    set_default_emotes(standard_emotes, amount_std_emote);
                     breaker = 1; break;
 
             case 4: printf("\nStandard emotes are:\n");
@@ -375,7 +415,10 @@ void emote_menu(emotelist *emoticon, emotelist *emotedummy){
                     }
                     printf("\n"); breaker = 1; break;
 
-            case 5: breaker = 0; break;
+            case 5: printf("\nShowing current emotes:\n"); 
+                    print_from_file(); breaker = 1; break;
+                    
+            case 6: breaker = 0; break;
 
             default: printf("Unknown command, try again!\n"); breaker = 1; 
         }
@@ -383,12 +426,25 @@ void emote_menu(emotelist *emoticon, emotelist *emotedummy){
     while(breaker != 0);
 }
 
-void set_default_emotes(emotelist standard_emotes[]){
+void print_from_file(){
+    char line[MAX_EMOTES];
+    FILE *emote;
+    emote = fopen("emotetwitch.txt", "r");
+
+    while(fgets(line, sizeof(line), emote) != NULL){
+        sscanf("%s", line);
+        printf("%s", line);
+    }
+    printf("\n");
+}
+
+void set_default_emotes(emotelist standard_emotes[], int amount_std_emote){
     int i;
+
     FILE *emotefile;
     emotefile = fopen("emotetwitch.txt", "w");
 
-    for(i = 0; i < 5; i++){
+    for(i = 0; i < amount_std_emote; i++){
         fprintf(emotefile, "%s\n", standard_emotes[i].emote);
     }
     fclose(emotefile);
@@ -414,14 +470,14 @@ void emote_to_file(FILE *emotefile, emotelist *emotedummy, int *amountofemotes){
     }
     do{
         printf("\nType emotename or EXIT: ");
-            scanf("%s", emotename);
-            if(strcmp(emotename, "EXIT") != 0){
-                /* Skriver emoten/teksten til filen */
-                fprintf(emotefile, "%s\n", emotename);
-            }
+        scanf("%s", emotename);
+        if(strcmp(emotename, "EXIT") != 0){
+            /* Skriver emoten/teksten til filen */
+            fprintf(emotefile, "%s\n", emotename);
         }
-        /* Kører indtil brugeren skriver EXIT */
-        while(strcmp(emotename, "EXIT") != 0);
+    }
+    /* Kører indtil brugeren skriver EXIT */
+    while(strcmp(emotename, "EXIT") != 0);
 }
 
 /* Funktion der indlæser emotesne fra emotefilen til en struct */
@@ -479,7 +535,6 @@ void chatfile_menu(char twitchchatfile[], int *loadchat){
     while(menu != 1);
 }
 
-
 /* Funktion der udskriver chatlogen til den valgte fil af brugeren */
 void save_to_file(twitchchat savestruct[], char savefile[], int numberoflines){
     int i;
@@ -508,17 +563,9 @@ void add_txt_to_filename(char savefile[]){
     savefile[i] = '\0';
 }
 
-
-
-
-
-
-
-
-
 void print_it_all(twitchchat chat[], twitchchat questions[], emotelist emoticon[], int msg_nr, int question_nr, int amountofemotes){
     static int prev_msg_nr = 0, prev_question_nr = 0;
-    int i, chatline, count;
+    int i, chatline, count, first_question, j = 0;
     static int question = 0;
     CONSOLE_SCREEN_BUFFER_INFO SBInfo; /* Somewhere to save screenbufferinfo, which includes the current position of the cursor */
     HANDLE hConsoleOut = GetStdHandle( STD_OUTPUT_HANDLE ); /* Something you have to have for some reason */
@@ -526,33 +573,36 @@ void print_it_all(twitchchat chat[], twitchchat questions[], emotelist emoticon[
 
     if(msg_nr != prev_msg_nr){
         system("cls");
-        count = msg_nr - 10 < 0 ? 0 : msg_nr - 10;
+        count = msg_nr - 20 < 0 ? 0 : msg_nr - 20;
         for(i = count; i <= msg_nr - 1; i++){
-            printf("%-3d[%-10s %-3d:%-3d:%-3d UTC] %s:\n%-40.40s\n", i, chat[i].date,
+            printf("%-3d[%-10s %-2d:%-2d:%-2d UTC] %s: %-40.40s\n", i, chat[i].date,
             chat[i].hour,
             chat[i].min,
             chat[i].sec,
             chat[i].username,
             chat[i].text); 
-            if(strlen(chat[i].text) > 60){
-                printf("%-60.60s\n", chat[i].text + 60);
+            if(strlen(chat[i].text) > 20){
+                printf("%-60.60s\n", chat[i].text + 20);
             }
             if(strlen(chat[i].text) > 80){
-                printf("%-60.60s\n", chat[i].text + 120);
+                printf("%-60.60s\n", chat[i].text + 100);
             }
             printf("\n");
         }
         print_emote_counter(emoticon, msg_nr - 1, amountofemotes);
 
-        /*GetConsoleScreenBufferInfo(hConsoleOut, &SBInfo);
+        GetConsoleScreenBufferInfo(hConsoleOut, &SBInfo);
         newPosition.X = 100;
-        newPosition.Y = 20;
+        newPosition.Y = 10;
         SetConsoleCursorPosition(hConsoleOut, newPosition);
 
-        for(i = 0; i < question; i++){
-            newPosition.Y = 20 + i;
+        printf("Questions:");
+        first_question = question - 10 < 0 ? 0 : question - 10; 
+        for(i = first_question; i < question; i++){
+            newPosition.Y = 11 + j;
             SetConsoleCursorPosition(hConsoleOut, newPosition);
-            printf("%s\n", questions[question].text);
+            printf("%-25s: %s", questions[i].username, questions[i].text);
+            j++;
         }
         if(question_nr != prev_question_nr){
             question++;
@@ -560,7 +610,7 @@ void print_it_all(twitchchat chat[], twitchchat questions[], emotelist emoticon[
         prev_question_nr = question_nr;
         newPosition.X = SBInfo.dwCursorPosition.X;
         newPosition.Y = SBInfo.dwCursorPosition.Y; 
-        SetConsoleCursorPosition(hConsoleOut, newPosition);*/
+        SetConsoleCursorPosition(hConsoleOut, newPosition);
     }
     prev_msg_nr = msg_nr;
 }
@@ -578,21 +628,81 @@ void print_emote_counter(emotelist *emoticon, int msg_nr, int amountofemotes){
     newPosition.Y = 0;
     SetConsoleCursorPosition(hConsoleOut, newPosition);
 
-    if(msg_nr != prev_msg_nr){
-        for(i = 0; i < amountofemotes; i++){
-            if(emoticon[i].emotecount > 1){ 
-                printf("%20s: %4d", emoticon[i].emote, emoticon[i].emotecount);
-                newPosition.Y = 1 + j;
-                SetConsoleCursorPosition(hConsoleOut, newPosition);
-                j++;
-            }
-            
-        }
+    printf("Emote Streaks:\n");
+
+    for(i = 0; i < amountofemotes; i++){
+        if(emoticon[i].emotecount > 1){ 
+            printf("%-10s: %4d", emoticon[i].emote, emoticon[i].emotecount);
+            newPosition.Y = 1 + j;
+            SetConsoleCursorPosition(hConsoleOut, newPosition);
+            j++;
+        }           
     }
+    
     prev_msg_nr = msg_nr;
 
     newPosition.X = SBInfo.dwCursorPosition.X;
     newPosition.Y = SBInfo.dwCursorPosition.Y; 
     SetConsoleCursorPosition(hConsoleOut, newPosition); 
+}
 
+void ctrl_f(twitchchat chat[], int offline_numberoflines){
+    char searchstring[500];
+    int matchfound = 0, i = 0, picknumber = 0;
+
+    printf("INSTRUCTION: 1) Press a number. 2) Press space. 3) Enter keyword.\n");
+    printf("Press (1) for username. (2) for text. Please enter your keyword: ");
+    scanf("%d %s", &picknumber, &searchstring);
+
+    if(picknumber == 1){
+        for(i; i < offline_numberoflines; i++){
+            if(strstr(chat[i].username, searchstring)){
+                printf("[%s %d:%d:%d UTC] %s: %s\n", 
+                    chat[i].date,
+                    chat[i].hour,
+                    chat[i].min,
+                    chat[i].sec,
+                    chat[i].username,
+                    chat[i].text); 
+                    matchfound = 1;
+            }
+        }
+        if(matchfound == 0) {
+                printf("No matches found.\n");
+        }
+    }
+    else if(picknumber == 2){
+        for(i; i < offline_numberoflines; i++){
+            if(strstr(chat[i].text, searchstring)){
+                printf("[%s %d:%d:%d UTC] %s: %s\n", 
+                    chat[i].date,
+                    chat[i].hour,
+                    chat[i].min,
+                    chat[i].sec,
+                    chat[i].username,
+                    chat[i].text); 
+                    matchfound = 1;
+            }
+        }
+        if(matchfound == 0) {
+                printf("No matches found.\n");
+        }
+    }
+    else{
+        printf("Wrong input. Please try again.\n");
+    }
+}
+
+void startup_default_emotes(emotelist standard_emotes[], int *amount_std_emote){
+    int i = 0;
+    char line[MAX_EMOTES];
+
+    FILE *standard_emotefile;
+
+    standard_emotefile = fopen("standard_emotes.txt", "r");
+    while(fgets(line, sizeof(line), standard_emotefile) != NULL){
+        sscanf(line, "%s", standard_emotes[i].emote);
+        i++;
+    }
+    *amount_std_emote = i;
 }
