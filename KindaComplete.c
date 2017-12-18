@@ -16,6 +16,7 @@
 #define SEC_PR_MIN 60
 #define SEC_PR_HOUR 3600
 
+/* Struct til chatbeskeder */
 typedef struct twitchchat{
     char date[STR_LEN];
     int hour;
@@ -25,6 +26,7 @@ typedef struct twitchchat{
     char text[MAX];
 } twitchchat;
 
+/* Struct til emotes */
 typedef struct emotelist {
     char emote[MAX_EMOTES];
     int emotecount;
@@ -121,40 +123,39 @@ int main(void){
 
         /* Offline indstillinger */
         if(offline == 1){
+            chatfile_menu(twitchchatfile, &loadchat);
+            if(loadchat == 2){
+                printf("Loading chat from: %s\n", twitchchatfile);
+                chatfile = fopen(twitchchatfile, "r");
+            }
+            else if(loadchat == 1){
+                printf("Loading chat from: %s\n", std_chatfile);
+                chatfile = fopen(std_chatfile, "r");
+            }
+            offline_numberoflines = count_line(chatfile);
+            offlinechat = (twitchchat *)malloc(offline_numberoflines * sizeof(twitchchat));
+            get_offline_chat(offlinechat, chatfile);
+            offlinemenu = 0; 
             do{
-                printf("\n\nOffline settings \n(1) Choose highlight emotes \n(2) Choose chatfile \n(3) Search chat \n(4) Show all questions"
-                       "\n(5) Show highlight timestamps \n(6) Go through chatfile \n(7) BACK TO MAIN MENU \nEnter: ");
+                printf("\n\nOffline settings \n(1) Choose highlight emotes \n(2) Search chat \n(3) Show all questions"
+                       "\n(4) Show highlight timestamps \n(5) Go through chatfile \n(6) BACK TO MAIN MENU \nEnter: ");
                 scanf("%d", &offlineinput);
 
                 switch(offlineinput){
                     /* Case 1: Indskriv emotes til emotefil */
                     case 1: emote_menu(emotes, emotedummy, standard_emotes, amount_std_emote); offlinemenu = 0; break; 
-                    /* Case 2: Vælg hvilken fil chatten skal læses fra */
-                    case 2: chatfile_menu(twitchchatfile, &loadchat);
-                            if(loadchat == 2){
-                                printf("Loading chat from: %s\n", twitchchatfile);
-                                chatfile = fopen(twitchchatfile, "r");
-                            }
-                            else if(loadchat == 1){
-                                printf("Loading chat from: %s\n", std_chatfile);
-                                chatfile = fopen(std_chatfile, "r");
-                            }
-                            offline_numberoflines = count_line(chatfile);
-                            offlinechat = (twitchchat *)malloc(offline_numberoflines * sizeof(twitchchat));
-                            get_offline_chat(offlinechat, chatfile);
+                    /* Case 2: Søg efter noget i chatten */
+                    case 2: printf("Searching chat\n"); 
+                            ctrl_f(offlinechat, offline_numberoflines);
                             offlinemenu = 0; break;
-                    /* Case 3: Søg efter noget i chatten */
-                    case 3: printf("Searching chat\n"); 
-                    ctrl_f(offlinechat, offline_numberoflines);
-                    offlinemenu = 0; break;
-                    /* Case 4: Vis alle spørgsmål fra filen */
-                    case 4: printf("Showing questions\n"); offlinemenu = 0; break;
-                    /* Case 5: Vis alle steder hvor der var highlights */
-                    case 5: printf("Showing highlight timestamps\n"); offlinemenu = 0; break;
-                    /* Case 6: Start læsningen af filen */
-                    case 6: mainmenu = 1; offlinemenu = 1; start_t = clock(); break;
-                    /* Case 7: Gå tilbage til main menu */
-                    case 7: offlinemenu = 1; offline = 0; offlinemenu = 1; break;
+                    /* Case 3: Vis alle spørgsmål fra filen */
+                    case 3: printf("Showing questions\n"); offlinemenu = 0; break;
+                    /* Case 4: Vis alle steder hvor der var highlights */
+                    case 4: printf("Showing highlight timestamps\n"); offlinemenu = 0; break;
+                    /* Case 5: Start læsningen af filen */
+                    case 5: mainmenu = 1; offlinemenu = 1; start_t = clock(); break;
+                    /* Case 6: Gå tilbage til main menu */
+                    case 6: offlinemenu = 1; offline = 0; offlinemenu = 1; break;
                     default: printf("Unknown command, try again!\n"); offlinemenu = 0; break;
                 }
             }
