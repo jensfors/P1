@@ -3,6 +3,7 @@
 #include <string.h>
 #include <time.h>
 #include <windows.h>
+#include <conio.h>
 
 #define MAX 1000
 #define STARTHOUR 0
@@ -64,7 +65,7 @@ int main(void){
     twitchchat highlights[100];
     twitchchat *livechat, questions[MAX_LINE], *offlinechat;
     int numberoflines = 0, msg_nr, amountofemotes = 0, question_nr, offlineinput, maininput, mainmenu, offlinemenu, onlinemenu, 
-        savechat = 0, loadchat = 1, offline = 0, online = 0, onlineinput, offline_numberoflines = 0, amount_std_emote, highlight_nr = 0, what_to_print = 0;
+        savechat = 0, loadchat = 1, offline = 0, online = 0, onlineinput, offline_numberoflines = 0, amount_std_emote, highlight_nr = 0, what_to_print = 0, done = 0;
     char savechatfile[STR_LEN], twitchchatfile[STR_LEN], std_chatfile[STR_LEN] = "twitchchat2.txt";
     emotelist *emotes = (emotelist*)malloc(MAX_EMOTES * sizeof(emotelist));
     emotelist *emotedummy = (emotelist*)malloc(MAX_EMOTES * sizeof(emotelist));
@@ -197,12 +198,13 @@ int main(void){
             exit(EXIT_FAILURE);
         }
         /* Går igennem hele chatten, en chatbesked af gangen */
-        while(1){
+        while(!done){
             msg_nr = get_twitch_chat(chatfile, livechat, emotes, start_t, amountofemotes);
             emote_streak(livechat, emotes, msg_nr - 1, amountofemotes);
             question_nr = find_questions(livechat, msg_nr - 1, questions);
             highlight_nr = auto_highlight(livechat, emotes, highlights, msg_nr - 1, numberoflines, amountofemotes);
             print_it_all(livechat, questions, emotes, highlights, msg_nr - 1, question_nr, amountofemotes, highlight_nr, what_to_print);
+            if(kbhit()) done = 1; 
         }
         /* Gemmer chatlogen til den angivet fil ellers dato.txt */
         if(savechat == 1){
