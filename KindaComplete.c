@@ -80,42 +80,42 @@ int main(void){
 
     do{
         /* Main menu */
-        printf("\n\nMain menu \n(1) Live options \n(2) Offline options \n(3) Go live \nEnter: ");
+        printf("Main menu \n(1) Live options \n(2) Offline options \n(3) Go live \nEnter: ");
         scanf("%d", &maininput);
         switch(maininput){
-            case 1: printf("\n\nShowing live settings"); online = 1; mainmenu = 0; break; 
-            case 2: printf("\n\nShowing offline settings"); offline = 1; mainmenu = 0; break;
-            case 3: printf("\n\nGoing Live \n\n");mainmenu = 1; start_t = clock(); break;
-            default: printf("Unknown command, try again!\n"); mainmenu = 0; break;
+            case 1: printf("\n\nShowing live settings"); online = 1; mainmenu = 0; system("cls"); break; 
+            case 2: printf("\n\nShowing offline settings"); offline = 1; mainmenu = 0; system("cls"); break;
+            case 3: printf("\n\nGoing Live \n\n");mainmenu = 1; start_t = clock(); system("cls"); break;
+            default: printf("Unknown command, try again!\n"); mainmenu = 0; system("cls"); break;
         }
 
         /* Live instillinger */
         if(online == 1){
             do{
-                printf("\n\nLive settings \n(1) Choose highlight emotes \n(2) Choose file to save chatlog to \n(3) Only show filtered chat \n(4) Only show questions" 
+                printf("Live settings \n(1) Choose highlight emotes \n(2) Choose file to save chatlog to \n(3) Only show filtered chat \n(4) Only show questions" 
                        "\n(5) Only show highlights \n(6) Show filtered chat/questions/highlight \n(7) Go live \n(8) BACK TO MAIN MENU \nEnter: ");
                 scanf("%d", &onlineinput);
 
                 switch(onlineinput){
                     /* Case 1: Indskriv emotes til emotefil */
-                    case 1: emote_menu(emotes, emotedummy, standard_emotes, amount_std_emote); onlinemenu = 0; break; 
+                    case 1: system("cls"); emote_menu(emotes, emotedummy, standard_emotes, amount_std_emote); onlinemenu = 0; system("cls"); break; 
                     /* Case 2: Gem chatloggen til en custom fil */
-                    case 2: printf("Please type in the name of the .txt file the chatlog will be saved to"); 
-                            savechat = choose_file_name(savechatfile);
-                            printf("\nChat log will be saved to: %s\n", savechatfile); onlinemenu = 0; break;
+                    case 2: system("cls"); printf("Please type in the name of the .txt file the chatlog will be saved to"); 
+                            savechat = choose_file_name(savechatfile); system("cls");
+                            printf("Chat log will be saved to: %s\n\n", savechatfile); onlinemenu = 0; break;
                     /* Case 3: Viser kun filtreret chat */
-                    case 3: printf("Showing filtered chat\n"); onlinemenu= 0; break;
+                    case 3: printf("Showing only filtered chat\n"); onlinemenu= 0; system("cls"); break;
                     /* Case 4: Viser kun spørgsmål */
-                    case 4: printf("Showing questions\n"); onlinemenu= 0; break;
+                    case 4: printf("Showing only questions\n"); onlinemenu= 0; system("cls"); break;
                     /* Case 5: Viser kun highlights */
-                    case 5: printf("Showing highlights\n"); onlinemenu = 0; break;
+                    case 5: printf("Showing only highlights\n"); onlinemenu = 0; system("cls"); break;
                     /* Case 6: Viser filtreret chat/spørgsmål/highlight */
-                    case 6: printf("Showing filtered chat/questions/highlight\n"); onlinemenu = 0; break;
+                    case 6: printf("Showing filtered chat/questions/highlight\n"); onlinemenu = 0; system("cls"); break;
                     /* Case 7: Starter streamchatten */
-                    case 7: mainmenu = 1; online = 0; onlinemenu = 1; start_t = clock(); break;
+                    case 7: mainmenu = 1; online = 0; onlinemenu = 1; start_t = clock(); system("cls"); break;
                     /* Case 8: Gå tilbage til main menu */
-                    case 8: onlinemenu = 1; online = 0; break;
-                    default: printf("Unknown command, try again!\n"); onlinemenu = 0; break;
+                    case 8: onlinemenu = 1; online = 0; system("cls"); break;
+                    default: system("cls"); printf("Unknown command, try again!\n"); onlinemenu = 0; break;
                 }
             }
             while(onlinemenu == 0);
@@ -123,6 +123,7 @@ int main(void){
 
         /* Offline indstillinger */
         if(offline == 1){
+            /* Prompter brugeren til at vælge chatfil */
             chatfile_menu(twitchchatfile, &loadchat);
             if(loadchat == 2){
                 printf("Loading chat from: %s\n", twitchchatfile);
@@ -136,35 +137,35 @@ int main(void){
             offlinechat = (twitchchat *)malloc(offline_numberoflines * sizeof(twitchchat));
             get_offline_chat(offlinechat, chatfile);
             offlinemenu = 0; 
+            system("cls");
+
             do{
-                printf("\n\nOffline settings \n(1) Choose highlight emotes \n(2) Search chat \n(3) Show all questions"
+                printf("Offline settings \n(1) Choose highlight emotes \n(2) Search chat \n(3) Show all questions"
                        "\n(4) Show highlight timestamps \n(5) Go through chatfile \n(6) BACK TO MAIN MENU \nEnter: ");
                 scanf("%d", &offlineinput);
 
                 switch(offlineinput){
                     /* Case 1: Indskriv emotes til emotefil */
-                    case 1: emote_menu(emotes, emotedummy, standard_emotes, amount_std_emote); offlinemenu = 0; break; 
+                    case 1: system("cls"); emote_menu(emotes, emotedummy, standard_emotes, amount_std_emote); offlinemenu = 0; system("cls"); break; 
                     /* Case 2: Søg efter noget i chatten */
-                    case 2: printf("Searching chat\n"); 
+                    case 2: system("cls"); printf("Searching chat\n"); 
                             ctrl_f(offlinechat, offline_numberoflines);
-                            offlinemenu = 0; break;
+                            offlinemenu = 0; printf("\n"); break;
                     /* Case 3: Vis alle spørgsmål fra filen */
-                    case 3: printf("Showing questions\n"); offlinemenu = 0; break;
+                    case 3: printf("Showing questions\n"); offlinemenu = 0; system("cls"); break;
                     /* Case 4: Vis alle steder hvor der var highlights */
-                    case 4: printf("Showing highlight timestamps\n"); offlinemenu = 0; break;
+                    case 4: printf("Showing highlight timestamps\n"); offlinemenu = 0; system("cls"); break;
                     /* Case 5: Start læsningen af filen */
-                    case 5: mainmenu = 1; offlinemenu = 1; start_t = clock(); break;
+                    case 5: mainmenu = 1; offlinemenu = 1; start_t = clock(); system("cls"); break;
                     /* Case 6: Gå tilbage til main menu */
-                    case 6: offlinemenu = 1; offline = 0; offlinemenu = 1; break;
-                    default: printf("Unknown command, try again!\n"); offlinemenu = 0; break;
+                    case 6: offlinemenu = 1; offline = 0; offlinemenu = 1; system("cls"); break;
+                    default: system("cls"); printf("Unknown command, try again!\n"); offlinemenu = 0; break;
                 }
             }
             while(offlinemenu == 0);
         }
     }
     while(mainmenu == 0);
-
-
 
     if(loadchat == 2){
         printf("Loading chat from: %s\n", twitchchatfile);
@@ -407,6 +408,7 @@ int auto_highlight(twitchchat chat[], emotelist emotes[], twitchchat highlights[
 void emote_menu(emotelist *emotes, emotelist *emotedummy, emotelist *standard_emotes, int amount_std_emote){
     int amountofemotes = 0, input, emotemenu, i = 0;
     FILE *dummyfile;
+    system("cls");
     
     do{
         printf("(1) Delete all emotes and add new ones \n(2) Add extra emotes \n(3) Set emotes to standard emotes" 
@@ -416,28 +418,28 @@ void emote_menu(emotelist *emotes, emotelist *emotedummy, emotelist *standard_em
         switch(input){
             /* Case 1: Slet forrige highlight emotes og/eller tilføje nye */
             case 1: choose_emotes(emotes, emotedummy, amountofemotes); 
-            emotemenu = 1; break;
+            emotemenu = 1; system("cls"); break;
             /* Case 2: Tilføj ekstra emotes uden at slette de forrige */
             case 2: dummyfile = fopen("emotetwitch.txt", "r"); 
                     make_emote_struct(dummyfile, emotedummy, &amountofemotes);
                     choose_emotes(emotes, emotedummy, amountofemotes);
-                    emotemenu = 1; break;
+                    emotemenu = 1; system("cls"); break;
             /* Case 3: Gør alle emotes til standardemotes */
-            case 3: printf("\nSetting emotes to default\n");
+            case 3: system("cls"); printf("Setting emotes to default\n");
                     set_default_emotes(standard_emotes, amount_std_emote);
                     emotemenu = 1; break;
             /* Case 4: Udskriver hvilke emotes der er standard emotes*/
-            case 4: printf("\nStandard emotes are:\n");
+            case 4: system("cls"); printf("Standard emotes are:\n");
                     for(i = 0; i < 5; i++){
                         printf("%s\n", standard_emotes[i].emote);
                     }
                     printf("\n"); emotemenu = 1; break;
             /* Case 5: Udskriver de nuværende valgte emotes */
-            case 5: printf("\nShowing current emotes:\n"); 
+            case 5: system("cls"); printf("Showing current emotes:\n"); 
                     print_emotes_from_file(); emotemenu = 1; break;
             /* Case 6: Gå tilbage til forrige menu */
-            case 6: emotemenu = 0; break;
-            default: printf("Unknown command, try again!\n"); emotemenu = 1; 
+            case 6: emotemenu = 0; system("cls"); break;
+            default: system("cls"); printf("Unknown command, try again!\n"); emotemenu = 1; 
         }
     }
     while(emotemenu != 0);
