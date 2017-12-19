@@ -146,7 +146,7 @@ int main(void){
             
             do{
                 printf("Offline settings \n(1) Choose highlight emotes \n(2) Search chat \n(3) Show all questions"
-                       "\n(4) Show highlight timestamps \n(5) Go through chatfile \n(6) BACK TO MAIN MENU \nEnter: ");
+                       "\n(4) Show highlight timestamps \n(5) BACK TO MAIN MENU \nEnter: ");
                 scanf("%d", &offlineinput);
 
                 switch(offlineinput){
@@ -162,10 +162,8 @@ int main(void){
                     /* Case 4: Vis alle steder hvor der var highlights */
                     case 4: system("cls"); printf("Showing highlight timestamps\n"); offlinemenu = 0; 
                             print_offline_highlights(offlinechat, highlights, offline_numberoflines, emotes, amountofemotes); break;
-                    /* Case 5: Start læsningen af filen */
-                    case 5: mainmenu = 1; offlinemenu = 1; start_t = clock(); system("cls"); break;
-                    /* Case 6: Gå tilbage til main menu */
-                    case 6: offlinemenu = 1; offline = 0; offlinemenu = 1; system("cls"); break;
+                    /* Case 5: Gå tilbage til main menu */
+                    case 5: offlinemenu = 1; offline = 0; offlinemenu = 1; system("cls"); break;
                     default: system("cls"); printf("Unknown command, try again!\n"); offlinemenu = 0; break;
                 }
             }
