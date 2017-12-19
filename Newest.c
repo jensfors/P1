@@ -727,7 +727,7 @@ void ctrl_f(twitchchat chat[], int offline_numberoflines){
     char searchstring[MAX_LINE];
     int matchfound = 0, i = 0, picknumber = 0;
 
-    printf("Search for username or chat text \n(1) for username. \n(2) for text. \nEnter: ");
+    printf("Search for username or chat text \n(1) Username search \n(2) Text search \nEnter: ");
     scanf("%d", &picknumber);
     printf("Search: ");
     scanf(" %500[^\n]", &searchstring);
