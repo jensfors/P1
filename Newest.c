@@ -131,11 +131,11 @@ int main(void){
             /* Prompter brugeren til at vælge chatfil */
             chatfile_menu(twitchchatfile, &loadchat);
             if(loadchat == 2){
-                printf("Loading chat from: %s\n", twitchchatfile);
+                system("cls"); printf("Loading chat from: %s\n", twitchchatfile);
                 chatfile = fopen(twitchchatfile, "r");
             }
             else if(loadchat == 1){
-                printf("Loading chat from: %s\n", std_chatfile);
+                system("cls"); printf("Loading chat from: %s\n", std_chatfile);
                 chatfile = fopen(std_chatfile, "r");
             }
             offline_numberoflines = count_line(chatfile);
@@ -724,12 +724,14 @@ void print_chat(twitchchat chat[], int msg_nr, int input){
 
 /* Funktion der gør det muligt at søge efter tekst/brugere i en chatfil */
 void ctrl_f(twitchchat chat[], int offline_numberoflines){
-    char searchstring[500];
+    char searchstring[MAX_LINE];
     int matchfound = 0, i = 0, picknumber = 0;
 
-    printf("INSTRUCTION: 1) Press a number. 2) Press space. 3) Enter keyword.");
-    printf("\n(1) for username. \n(2) for text. \nAnd pllease enter your keyword: ");
-    scanf("%d %s", &picknumber, &searchstring);
+    printf("Search for username or chat text \n(1) for username. \n(2) for text. \nEnter: ");
+    scanf("%d", &picknumber);
+    printf("Search: ");
+    scanf(" %500[^\n]", &searchstring);
+    system("cls");
 
     /* Søger igennem hele chatfilen for det valgte brugernavn */
     if(picknumber == 1){
@@ -742,7 +744,7 @@ void ctrl_f(twitchchat chat[], int offline_numberoflines){
                     chat[i].sec,
                     chat[i].username,
                     chat[i].text); 
-                    matchfound = 1;
+                    matchfound++;
             }
         }
         if(matchfound == 0) {
@@ -760,7 +762,7 @@ void ctrl_f(twitchchat chat[], int offline_numberoflines){
                     chat[i].sec,
                     chat[i].username,
                     chat[i].text); 
-                    matchfound = 1;
+                    matchfound++;
             }
         }
         if(matchfound == 0) {
@@ -769,6 +771,9 @@ void ctrl_f(twitchchat chat[], int offline_numberoflines){
     }
     else{
         printf("Wrong input. Please try again.\n");
+    }
+    if(matchfound > 0){
+        printf("\nFound %d matches to '%s'\n", matchfound, searchstring);
     }
 }
 
