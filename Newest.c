@@ -33,12 +33,12 @@ typedef struct emotelist {
 } emotelist;
 
 /* Prototyper */
-int get_twitch_chat(FILE *chatfile, twitchchat chat[],  emotelist *emotes, clock_t start_t, int amountofemotes);
+int get_twitch_chat(FILE *chatfile, twitchchat chat[], clock_t start_t);
 void timer(int *hour, int *min, int *sec, clock_t start_t, clock_t end_t);
 int count_line(FILE *chatfile);
 void emote_counter(twitchchat chat[], emotelist *emotes, int i, int amountofemotes);
 void emote_streak(twitchchat chat[], emotelist *emotes, int i, int amountofemotes);
-int find_questions(twitchchat test[], int n, twitchchat questions[]);
+int find_questions(twitchchat livechat[], int n, twitchchat questions[]);
 void print_emote_counter(emotelist *emotes, int msg_nr, int amountofemotes, int input);
 int auto_highlight(twitchchat chat[], emotelist emotes[], twitchchat highlights[], int msg_nr, int numberoflines, int amountofemotes);
 void emote_to_file(FILE *emotefile, emotelist *emotedummy, int *amountofemotes);
@@ -157,10 +157,10 @@ int main(void){
                             offlinemenu = 0; printf("\n"); break;
                     /* Case 3: Vis alle spørgsmål fra filen */
                     case 3: system("cls"); printf("Showing questions\n"); offlinemenu = 0;
-                            print_offline_questions(offlinechat, questions, offline_numberoflines); break;
+                            print_offline_questions(offlinechat, questions, offline_numberoflines); printf("\n"); break;
                     /* Case 4: Vis alle steder hvor der var highlights */
                     case 4: system("cls"); printf("Showing highlight timestamps\n"); offlinemenu = 0; 
-                            print_offline_highlights(offlinechat, highlights, offline_numberoflines, emotes, amountofemotes); break;
+                            /*print_offline_highlights(offlinechat, highlights, offline_numberoflines, emotes, amountofemotes);*/ break;
                     /* Case 5: Start læsningen af filen */
                     case 5: mainmenu = 1; offlinemenu = 1; start_t = clock(); system("cls"); break;
                     /* Case 6: Gå tilbage til main menu */
@@ -203,7 +203,7 @@ int main(void){
         }
         /* Går igennem hele chatten, en chatbesked af gangen */
         while(!done){
-            msg_nr = get_twitch_chat(chatfile, livechat, emotes, start_t, amountofemotes);
+            msg_nr = get_twitch_chat(chatfile, livechat, start_t);
             emote_streak(livechat, emotes, msg_nr - 1, amountofemotes);
             question_nr = find_questions(livechat, msg_nr - 1, questions);
             highlight_nr = auto_highlight(livechat, emotes, highlights, msg_nr - 1, numberoflines, amountofemotes);
@@ -232,7 +232,7 @@ int main(void){
     return 0;
 }
 /* Funktion der indlæser en chatbesked og ser om beskeden passer med den nuværende tid */
-int get_twitch_chat(FILE *chatfile, twitchchat chat[], emotelist *emotes, clock_t start_t, int amountofemotes){
+int get_twitch_chat(FILE *chatfile, twitchchat chat[], clock_t start_t){
     static int i = 0, hour = 0, min = 0, sec = 0;
     char line[MAX_LINE], dummystr[MAX_LINE];
     static clock_t end_t;
@@ -286,7 +286,7 @@ int count_line(FILE *chatfile){
     return i;
 }
 
-/* Funktion der optæller emotestreaks for emotes i et givent tidsinterval */
+/* Funktion der optæller emote streaks for emotes i et givent tidsinterval */
 void emote_streak(twitchchat chat[], emotelist *emotes, int i, int amountofemotes){
     /* secback = sekunder der bliver set tilbage */
     int j = 0, k, n = 0, secback = 10, startsec, totalsec, emotefound = 0,
@@ -333,11 +333,11 @@ void emote_streak(twitchchat chat[], emotelist *emotes, int i, int amountofemote
 }
 
 /* Funktion der finder spørgsmål i chatten */
-int find_questions(twitchchat test[], int n, twitchchat questions[]){
+int find_questions(twitchchat livechat[], int n, twitchchat questions[]){
     static int j = 0;
     char curr[MAX];
     static char prev[MAX];
-    strcpy(curr, test[n].text);
+    strcpy(curr, livechat[n].text);
     if(!(prev == NULL || strcmp(curr, prev) == 0)){
         if(strstr(curr, "????")){
             return j;
@@ -352,11 +352,11 @@ int find_questions(twitchchat test[], int n, twitchchat questions[]){
             return j;
         }
         else if(strchr(curr, '?')){
-            questions[j] = test[n];
+            questions[j] = livechat[n];
             j++;
         }
     }
-    strcpy(prev,test[n].text);
+    strcpy(prev,livechat[n].text);
 
     return j;
 }
@@ -365,8 +365,6 @@ int find_questions(twitchchat test[], int n, twitchchat questions[]){
 int auto_highlight(twitchchat chat[], emotelist emotes[], twitchchat highlights[], int msg_nr, int numberoflines, int amountofemotes){
     int i, j = 0, k, totalsec, startsec, emotecounter = 0, res = 0, time_output, offset = 10;
     static int prev_startsec = 0, prev_emotecounter = 0, prev_messages = 0, highlight_counter = 0;
-
-    printf("cnacer\n");
 
     /* Går 10 sek tilbage og gennemgår alle beskeder derfra til nu */
     startsec = chat[msg_nr].hour * SEC_PR_HOUR + chat[msg_nr].min * SEC_PR_MIN + chat[msg_nr].sec;
@@ -485,7 +483,7 @@ void emote_to_file(FILE *emotefile, emotelist *emotedummy, int *amountofemotes){
     }
     /* Brugeren kan indtaste emotes*/
     do{
-        printf("\nType emotename or (0) to exit): ");
+        printf("Type emotename or (0) to exit): ");
         scanf("%s", emotename);
         if(strcmp(emotename, "0") != 0){
             /* Skriver emoten/teksten til filen */
@@ -544,8 +542,7 @@ void chatfile_menu(char twitchchatfile[], int *loadchat){
             case 1: *loadchat = 1; menu = 1; break;
             case 2: *loadchat = 2; menu = 1; 
                     printf("Please type in the name of the .txt file the chat will be loaded from"); 
-                    choose_file_name(twitchchatfile);
-                    printf("\nChat will be loaded from %s\n", twitchchatfile); break;
+                    choose_file_name(twitchchatfile); break;
             default: menu = 0; break; 
         }
     }
@@ -730,8 +727,8 @@ void ctrl_f(twitchchat chat[], int offline_numberoflines){
     char searchstring[500];
     int matchfound = 0, i = 0, picknumber = 0;
 
-    printf("INSTRUCTION: 1) Press a number. 2) Press space. 3) Enter keyword.\n");
-    printf("Press (1) for username. (2) for text. Please enter your keyword: ");
+    printf("INSTRUCTION: 1) Press a number. 2) Press space. 3) Enter keyword.");
+    printf("\n(1) for username. \n(2) for text. \nAnd pllease enter your keyword: ");
     scanf("%d %s", &picknumber, &searchstring);
 
     /* Søger igennem hele chatfilen for det valgte brugernavn */
