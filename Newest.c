@@ -12,7 +12,7 @@
 #define MAX_LINE 600
 #define STR_LEN 30
 #define MAX_EMOTES 30
-#define HIGHLIGHT_THRESHOLD 2
+#define HIGHLIGHT_THRESHOLD 0
 #define SEC_PR_MIN 60
 #define SEC_PR_HOUR 3600
 
@@ -59,6 +59,8 @@ void print_questions(twitchchat questions[], int question_nr, int input);
 void set_default_emotes(emotelist standard_emotes[], int amount_std_emote);
 void print_highlights(twitchchat highlights[], int highlight_nr, int input);
 void print_chat(twitchchat chat[], int msg_nr, int input);
+void print_offline_questions(twitchchat offlinechat[], twitchchat questions[], int offline_numberoflines);
+void print_offline_highlights(twitchchat offlinechat[], twitchchat highlights[], int offline_numberoflines, emotelist emotes[], int amountofemotes);
 
 /* Main */
 int main(void){
@@ -154,9 +156,11 @@ int main(void){
                             ctrl_f(offlinechat, offline_numberoflines);
                             offlinemenu = 0; printf("\n"); break;
                     /* Case 3: Vis alle spørgsmål fra filen */
-                    case 3: printf("Showing questions\n"); offlinemenu = 0; system("cls"); break;
+                    case 3: system("cls"); printf("Showing questions\n"); offlinemenu = 0;
+                            print_offline_questions(offlinechat, questions, offline_numberoflines); break;
                     /* Case 4: Vis alle steder hvor der var highlights */
-                    case 4: printf("Showing highlight timestamps\n"); offlinemenu = 0; system("cls"); break;
+                    case 4: system("cls"); printf("Showing highlight timestamps\n"); offlinemenu = 0; 
+                            print_offline_highlights(offlinechat, highlights, offline_numberoflines, emotes, amountofemotes); break;
                     /* Case 5: Start læsningen af filen */
                     case 5: mainmenu = 1; offlinemenu = 1; start_t = clock(); system("cls"); break;
                     /* Case 6: Gå tilbage til main menu */
@@ -361,6 +365,8 @@ int find_questions(twitchchat test[], int n, twitchchat questions[]){
 int auto_highlight(twitchchat chat[], emotelist emotes[], twitchchat highlights[], int msg_nr, int numberoflines, int amountofemotes){
     int i, j = 0, k, totalsec, startsec, emotecounter = 0, res = 0, time_output, offset = 10;
     static int prev_startsec = 0, prev_emotecounter = 0, prev_messages = 0, highlight_counter = 0;
+
+    printf("cnacer\n");
 
     /* Går 10 sek tilbage og gennemgår alle beskeder derfra til nu */
     startsec = chat[msg_nr].hour * SEC_PR_HOUR + chat[msg_nr].min * SEC_PR_MIN + chat[msg_nr].sec;
@@ -815,3 +821,27 @@ void print_emotes_from_file(){
     }
     printf("\n");
 }
+
+void print_offline_questions(twitchchat offlinechat[], twitchchat questions[], int offline_numberoflines){
+    int i, question_nr, prev_question_nr = 0;
+
+    for(i = 0; i < offline_numberoflines; i++){
+        question_nr = find_questions(offlinechat, i, questions);
+        if(question_nr != prev_question_nr){
+            printf("[%-2d:%-2d:%-2d] %-25s: %s\n", questions[question_nr - 1].hour, questions[question_nr - 1].min, questions[question_nr - 1].sec, questions[question_nr - 1].username, questions[question_nr - 1].text);
+        }
+        prev_question_nr = question_nr; 
+    }
+}
+
+/*void print_offline_highlights(twitchchat offlinechat[], twitchchat highlights[], int offline_numberoflines, emotelist emotes[], int amountofemotes){
+    int i, highlight_nr, prev_highlight_nr = 0;
+
+    for(i = 0; i < offline_numberoflines; i++){
+        highlight_nr = auto_highlight(offlinechat, emotes, highlights, i, offline_numberoflines, amountofemotes);
+        if(highlight_nr != prev_highlight_nr){
+            printf("Timestamp: [%-2d:%-2d:%-2d]\n", highlights[highlight_nr - 1].hour, highlights[highlight_nr - 1].min, highlights[highlight_nr - 1].sec);
+        }
+        prev_highlight_nr = highlight_nr;
+    }
+}*/
