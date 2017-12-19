@@ -174,23 +174,18 @@ int main(void){
     while(mainmenu == 0);
 
     if(loadchat == 2){
-        printf("Loading chat from: %s\n", twitchchatfile);
         chatfile = fopen(twitchchatfile, "r");
     }
     else if(loadchat == 1){
-        printf("Loading chat from: %s\n", std_chatfile);
         chatfile = fopen(std_chatfile, "r");
     }
   
     /* Ser om der er en twitchchat i chatfilen */
     if(chatfile != NULL){
         
-        /* Åbner filen med de valgte emotes */
+        /* Åbner filen med de valgte emotes og laver en struct med emotes */
         ifpemotefile = fopen("emotetwitch.txt", "r");
         make_emote_struct(ifpemotefile, emotes, &amountofemotes); 
-        printf("Highlight Emotes:\n");
-        print_struct(emotes, amountofemotes);
-        printf("\n");
 
         numberoflines = count_line(chatfile);
         livechat = (twitchchat *)malloc(numberoflines * sizeof(twitchchat));
