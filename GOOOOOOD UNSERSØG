@@ -1,0 +1,147 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX 800
+#define SUMTING 2880 * 2
+
+typedef struct twitchchat {
+    char date[MAX];
+    int hour;
+    int min;
+    int sec;
+    char username[MAX];
+    char text[MAX];
+} twitchchat;
+
+typedef struct emoticon{
+    char name[20];
+    int counter;
+} emoticon;
+
+typedef struct message{
+    int counter;
+} message;
+
+typedef struct cancer{
+    char emote[20];
+    int counter;
+} cancer;
+
+void get_twitch_chat(FILE *ifp, twitchchat test[]);
+int count_line(FILE *ifp);
+void print_to_file(FILE *ofp, message messages[], emoticon **emotes);
+
+int main(void){
+    twitchchat *pointertest;
+    int numberoflines = 0;
+    int timer = 0, i = 0, j = 0, k, startsec = 0, totalsec = 0;
+    emoticon **emotes = (emoticon**)malloc(19 * sizeof(emoticon*));
+    /*emoticon emotes[19][SUMTING];*/
+    message *messages = (message*)malloc(SUMTING * sizeof(message));
+    char* emotas[20] = {"PogChamp", "LUL", "LuL", "Kappa", "GTChimp", "Jebaited", "WutFace",
+     "TriHard", "DansGame", "MingLee", "haHAA", "MonkaS", "KKona", "SourPls", "OMEGALUL", "FeelsBirthdayMan", "BibleThump", "gachiGASM", "Clap"};
+    
+    for (i = 0; i < 19; i++){
+        emotes[i] = (emoticon*)malloc(SUMTING * sizeof(emoticon));
+    }
+
+    FILE *ifp;
+    FILE *ofp;
+    ifp = fopen("twitchchat2.txt", "r");
+    ofp = fopen("outputtwitch.txt", "w");
+
+    if(ifp != NULL){
+        numberoflines = count_line(ifp);
+        pointertest = (twitchchat *)malloc(numberoflines * sizeof(twitchchat));
+
+        if(pointertest == NULL){
+            printf("Allocation problems. Bye.\n");
+            exit(EXIT_FAILURE);
+        }
+
+        get_twitch_chat(ifp, pointertest);
+        for(j = 0; j < 19; j++){
+            for(i = 0; i < SUMTING; i++){
+                strcpy(emotes[j][0].name, emotas[j]);
+                emotes[j][i].counter = 0;
+            }
+        }
+
+        i = 0;
+        j = 0;
+
+
+        startsec = pointertest[i].hour * 3600 + pointertest[i].min * 60 + pointertest[i].sec;
+        totalsec = startsec + 15;
+
+        while(i < numberoflines){
+            j = 0;
+            while(startsec <= totalsec && i < numberoflines){
+                for(k = 0; k < 19; k++){
+                    if(strstr(pointertest[i].text, emotes[k][0].name)){
+                        emotes[k][timer].counter += 1;
+                    }
+                }
+                j++;
+                i++;
+                startsec = pointertest[i].hour * 3600 + pointertest[i].min * 60 + pointertest[i].sec;
+            }
+            messages[timer].counter = j;
+            totalsec += 15;
+            timer++;           
+        }
+    
+        print_to_file(ofp, messages, emotes);
+
+    }
+    else{
+        printf("Can't open the file%s\n", "twitchchat.txt");
+    }
+    
+    fclose(ifp);
+    free(pointertest);
+    free(emotes);
+    free(messages);
+
+    return 0;
+}
+
+void get_twitch_chat(FILE *ifp, twitchchat test[]){
+    int i = 0;
+    char line[400];
+
+    while(fgets(line, sizeof(line), ifp) != NULL){ 
+        sscanf(line, " [%s %d:%d:%d UTC] %[^:]: %500[^\n]", 
+        test[i].date,
+        &test[i].hour,
+        &test[i].min,
+        &test[i].sec,
+        test[i].username,
+        test[i].text);
+        i++;
+    }
+    fclose(ifp);
+}
+
+int count_line(FILE *ifp){
+    int i = 0;
+    char line[400];
+    while(fgets(line, sizeof(line), ifp) != NULL){ 
+        i++;
+    }
+    rewind(ifp);
+    return i;
+}
+
+void print_to_file(FILE *ofp, message messages[], emoticon **emotes){
+    int i, j;
+    for(i = 0; i < SUMTING; i++){
+        fprintf(ofp, "%d\t", messages[i].counter);
+        for(j = 0; j < 19; j++){
+            fprintf(ofp, "%d\t", emotes[j][i].counter);
+        }
+        fprintf(ofp,"\n");
+    }
+    fclose(ofp);
+}
