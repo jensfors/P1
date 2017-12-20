@@ -1,4 +1,13 @@
-README-fil til det medfølgende program til automatisk highlight og chatfiltrering i af en Twitch Chat
+README-fil til det medfølgende c-program til automatisk highlight og chatfiltrering i af en Twitch Chat
+
+// Ændringer i c-programmet //
+I cprogrammet er der mulighed for at ændre følgende værdier:
+	MIN_SIMIL: Bestemmer hvor striks chat filtreringen skal være (Double værdi fra 0 - 1)
+	HIGHLIGHT_THRESHOLD: Er multiplikatoren for hvornår der vurderes der er highlight (Heltal)
+	STARTHOUR: Start timen til en chatlog
+	STARMIN: Start minuttet til en chatlog
+	STARTSEC: Start sekundet til en chatlog
+
 
 // Oversættelse af programmet //
 Programmet oversættes med 'gcc chatbot.c' ved at bruge en GNU compiler 
